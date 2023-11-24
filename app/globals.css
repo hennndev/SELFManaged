@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer components {
+    .flexx {
+        @apply flex items-center;
+    }
+    .flex-between {
+        @apply flex items-center justify-between;
+    }
+    .flex-center {
+        @apply flex items-center justify-center;
+    }
+
+
+
+    /* sidebar */
+    .link-container {
+        @apply flex items-center pl-8 py-2 cursor-pointer hover:bg-blue-700 rounded-md mb-3
+    }
+}
