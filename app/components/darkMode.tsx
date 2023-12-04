@@ -18,8 +18,8 @@ const DarkMode = () => {
     }
     
     return theme === 'dark' ? 
-        (<GoSun className='text-xl text-gray-700' onClick={handleTheme}/>) :
-        (<GoMoon className='text-xl text-gray-700' onClick={handleTheme}/>)
+        (<GoSun className='navbar-icon' onClick={handleTheme}/>) :
+        (<GoMoon className='navbar-icon' onClick={handleTheme}/>)
 }
 
 export default DarkMode

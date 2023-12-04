@@ -1,25 +1,22 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { v4 as uuid } from 'uuid'
 import 'react-international-phone/style.css'
+import toast, { Toaster } from 'react-hot-toast'
+import Button from '@/app/components/utils/button'
 import { useForm, Controller } from 'react-hook-form'
 import { PhoneInput } from 'react-international-phone'
+import { useColleagueStore } from '@/app/store/zustand'
 import { CountryDropdown } from 'react-country-region-selector'
 
 
-interface ColleagueTypes {
-    name: string
-    address: string
-    job: string
-    telpNumber: string
-    country: string
-    isFavorite: string
-}
  
 const ColleagueForm = ({title}: {title: string}) => {
-
-    const [isLoading, setIsLoading] = useState(false)
     
-    const {register, formState: {errors}, reset,  handleSubmit, control} = useForm<ColleagueTypes>({defaultValues: {
+    const { colleagues, addColleague } = useColleagueStore()
+    const [isFocus, setIsFocus] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const {register, formState: {errors}, clearErrors, reset,  handleSubmit, control} = useForm<ColleagueTypes>({defaultValues: {
         name: "",
         address: "",
         job: "",
@@ -27,16 +24,41 @@ const ColleagueForm = ({title}: {title: string}) => {
         country: "",
         isFavorite: ""
     }})
-
+    
+    const onReset = () => {
+        clearErrors()
+        reset()
+    }
     const onSubmit = (values: ColleagueTypes) => {
-        console.log(values)
+        setIsLoading(true)
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                setIsLoading(false)
+                addColleague({
+                    id: uuid(),
+                    name: values.name,
+                    address: values.address,
+                    job: values.job,
+                    telpNumber: values.telpNumber,
+                    country: values.country,
+                    isFavorite: values.isFavorite
+                })
+                toast.success('Success add new colleague')
+                onReset()
+                resolve(true)
+            }, 3000)
+        })
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <h1 className='text-gray-700 text-lg font-medium mb-5 underline'>{title}</h1>
+            <Toaster toastOptions={{
+                className: 'dark:bg-[#222] dark:!text-[#fff]',
+                duration: 5000
+            }}/>
+            <h1 className='text-gray-700 dark:text-gray-300 text-lg font-medium mb-5 underline'>{title}</h1>
             <div className='flex flex-col mb-5'>
-                <label htmlFor="name" className='mb-2 text-gray-700'>Colleague name</label>
+                <label htmlFor="name" className='label'>Colleague name</label>
                 <input 
                     type='text'
                     id='name' 
@@ -48,14 +70,14 @@ const ColleagueForm = ({title}: {title: string}) => {
                         }
                     })}
                     placeholder='Input colleague name...' 
-                    className='border border-gray-200 outline-none rounded-md p-2'/>
+                    className={`input ${errors.name?.message ? 'input-error' : ''}`}/>
                 {errors.name ? (
-                    <small className='text-red-700 mt-0.5 font-medium'>{errors.name?.message}</small>
+                    <small className='input-msg-error'>{errors.name?.message}</small>
                 ) : null}
             </div>
 
             <div className='flex flex-col mb-5'>
-                <label htmlFor="job" className='mb-2 text-gray-700'>Colleague job</label>
+                <label htmlFor="job" className='label'>Colleague job</label>
                 <input 
                     type='text' 
                     id='job'
@@ -63,14 +85,14 @@ const ColleagueForm = ({title}: {title: string}) => {
                         required: 'This field is required! (You can input Unemployed if dont have a job)'
                     })}
                     placeholder='Input colleague job...' 
-                    className='border border-gray-200 outline-none rounded-md p-2'/>
+                    className={`input ${errors.job?.message ? 'input-error' : ''}`}/>
                 {errors.job ? (
-                    <small className='text-red-700 mt-0.5 font-medium'>{errors.job?.message}</small>
+                    <small className='input-msg-error'>{errors.job?.message}</small>
                 ) : null}
             </div>
 
             <div className='flex flex-col mb-5'>
-                <label htmlFor="address" className='mb-2 text-gray-700'>Colleague address</label>
+                <label htmlFor="address" className='label'>Colleague address</label>
                 <textarea 
                     id="address" 
                     {...register('address', {
@@ -78,14 +100,14 @@ const ColleagueForm = ({title}: {title: string}) => {
                     })}
                     placeholder='Input colleague address..'
                     rows={5} 
-                    className='border border-gray-200 outline-none rounded-md p-2'></textarea>
+                    className={`input ${errors.address?.message ? 'input-error' : ''}`}></textarea>
                 {errors.address ? (
-                    <small className='text-red-700 mt-0.5 font-medium'>{errors.address?.message}</small>
+                    <small className='input-msg-error'>{errors.address?.message}</small>
                 ) : null}
             </div>
 
             <div className="flex flex-col mb-5">
-                <label htmlFor="telpNumber" className='mb-2 text-gray-700'>Colleague telp number</label>
+                <label htmlFor="telpNumber" className='label'>Colleague telp number</label>
                 <Controller
                     name="telpNumber"
                     control={control}
@@ -100,17 +122,20 @@ const ColleagueForm = ({title}: {title: string}) => {
                         <PhoneInput
                             defaultCountry='id'
                             {...field}
-                            className='mr-3'
+                            onFocus={() => setIsFocus(true)}
+                            onBlur={() => setIsFocus(false)}
+                            className={`[&>.react-international-phone-input]:ring-0 [&>.react-international-phone-input]:!bg-transparent [&>.react-international-phone-input]:dark:!border-[#222] [&>.react-international-phone-input]:dark:!text-gray-300 mr-3 outline-none w-full !bg-transparent ${isFocus && !errors.telpNumber?.message ? '[&>.react-international-phone-country-selector]:rounded [&>.react-international-phone-country-selector]:ring-[1.5px] [&>.react-international-phone-country-selector]:ring-blue-500 [&>.react-international-phone-input]:!ring-[1.5px] [&>.react-international-phone-input]:!ring-blue-500' : ''} 
+                            ${errors.telpNumber?.message ? '[&>.react-international-phone-country-selector]:rounded [&>.react-international-phone-country-selector]:ring-[1.5px] [&>.react-international-phone-country-selector]:ring-red-500 [&>.react-international-phone-input]:!ring-[1.5px] [&>.react-international-phone-input]:!ring-red-500' : ''}`}
                         />
                     )}
                 />  
                 {errors.telpNumber ? (
-                    <small className='text-red-700 mt-0.5 font-medium break-words'>{errors.telpNumber?.message}</small>
+                    <small className='input-msg-error'>{errors.telpNumber?.message}</small>
                 ) : null}  
             </div>
 
             <div className="flex flex-1 flex-col mb-5">
-                <label htmlFor="telpNumber" className='mb-2 text-gray-700'>Colleague telp number</label>
+                <label htmlFor="telpNumber" className='label'>Colleague telp number</label>
                 <Controller
                     name="country"
                     control={control}
@@ -118,38 +143,35 @@ const ColleagueForm = ({title}: {title: string}) => {
                     render={({ field }) => (
                         <CountryDropdown 
                             {...field} 
-                            classes='flex-1 border border-gray-200 outline-none rounded-md p-2'/>
+                            classes={`flex-1 input [&>option]:dark:!bg-[#222] ${errors.country?.message ? 'input-error' : ''}`}/>
                     )}
                 />  
                 {errors.country ? (
-                    <small className='text-red-700 mt-0.5 font-medium'>{errors.country?.message}</small>
+                    <small className='input-msg-error'>{errors.country?.message}</small>
                 ) : null}  
             </div>
 
             <div className='flex flex-col mb-5'>
-                <label htmlFor="isFavorite" className='mb-2 text-gray-700'>Make him/her as a favorite person 😍</label>
+                <label htmlFor="isFavorite" className='label'>Make him/her as a favorite person 😍</label>
                 <select 
                     id="isFavorite" 
                     {...register('isFavorite', {
                         required: 'This field is required!'
                     })}
-                    className='border border-gray-200 outline-none rounded-md p-2'>
+                    className={`input dark:!bg-transparent [&>option]:dark:bg-[#222] ${errors.isFavorite?.message ? 'input-error' : ''}`}>
                     <option value="" selected>Choose option</option>
                     <option value="favorite">Favorite person 😍</option>
                     <option value="ordinary">Just ordinary person 😊</option>
                 </select>
                 {errors.isFavorite ? (
-                    <small className='text-red-700 mt-0.5 font-medium'>{errors.isFavorite?.message}</small>
+                    <small className='input-msg-error'>{errors.isFavorite?.message}</small>
                 ) : null} 
             </div>
+
+
             <div className="flexx mt-10">
-                <button 
-                    type='submit' 
-                    className='border-none outline-none px-3 py-2 bg-blue-700 text-white rounded-md mr-3'>Submit new colleague</button>
-                <button 
-                    type='button'
-                    onClick={() => reset()} 
-                    className='border-none outline-none px-3 py-2 bg-red-700 text-white rounded-md'>Clear form</button>
+                <Button type='submit' isLoading={isLoading} variant='primary'>Submit</Button>
+                <Button type='button' isLoading={isLoading} variant='danger' handleClick={onReset}>Clear form</Button>
             </div>
         </form>
     )

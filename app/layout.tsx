@@ -2,7 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import ThemeWrapper from '@/app/components/wrapper/themeWrapper'
-import Sidebar from '@/app/components/sidebar'
+import NextAuthProvider from '@/app/components/wrapper/nextAuthProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,12 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
         <body className={inter.className}>
-            <ThemeWrapper enableSystem={false} attribute='class'>
-                <main className='flex'>
-                    <Sidebar/>
-                    {children}
-                </main>
-            </ThemeWrapper>
+            <NextAuthProvider>
+              <ThemeWrapper enableSystem={false} attribute='class'>
+                  {children}
+              </ThemeWrapper>
+            </NextAuthProvider>
         </body>
     </html>
   )

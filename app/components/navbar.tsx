@@ -6,18 +6,30 @@ import { AiOutlineBell, AiOutlineUser , AiOutlineMessage, AiOutlineQuestionCircl
 
 const Navbar = ({title}: {title: string}) => {
     return (
-        <header className='sticky top-0 bg-white flex-between py-4'>
+        <header className='sticky top-0 bg-white dark:bg-[#111] flex-between py-4'>
             <div className="flexx">
-                <h1 className='text-[17px] text-gray-700 font-medium mr-5'>{title}</h1>
+                <h1 className='text-[17px] text-gray-700 dark:text-gray-300 font-medium mr-5'>{title}</h1>
                 <SearchInput/>
             </div>
             <div className="flexx">
-                <AiOutlineQuestionCircle className='text-xl text-gray-700 mr-4'/>
-                <AiOutlineBell className='text-xl text-gray-700 mr-4'/>
-                <AiOutlineMessage className='text-xl text-gray-700 mr-4'/>
-                <AiOutlineMail className='text-xl text-gray-700 mr-4'/>
-                <AiOutlineUser className='text-xl text-gray-700 mr-3'/>
-                <DarkMode/>
+                <div className='icon-button mr-1'>
+                    <AiOutlineQuestionCircle className='navbar-icon'/>
+                </div>
+                <div className='icon-button mr-1'>
+                    <AiOutlineBell className='navbar-icon'/>
+                </div>
+                <div className='icon-button mr-1'>
+                    <AiOutlineMessage className='navbar-icon'/>
+                </div>
+                <div className='icon-button mr-1'>
+                    <AiOutlineMail className='navbar-icon'/>
+                </div>
+                <div className='icon-button'>
+                    <AiOutlineUser className='navbar-icon'/>
+                </div>
+                <div className='icon-button mr-1'>
+                    <DarkMode/>
+                </div>
             </div>
         </header>
   )
