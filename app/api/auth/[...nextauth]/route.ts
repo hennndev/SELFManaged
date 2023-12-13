@@ -1,11 +1,11 @@
-import NextAuth from "next-auth"
 import bcrypt from 'bcryptjs'
+import NextAuth from "next-auth"
 import { NextAuthOptions } from 'next-auth'
 import { connectDB } from "@/app/lib/mongoose"
 import { Users } from "@/app/lib/models/user.model"
 import GoogleProvider from 'next-auth/providers/google'
-import GithubProvider from "next-auth/providers/github"
 import Credentials from "next-auth/providers/credentials"
+import { receiveEmailWelcome } from "@/app/lib/actions/emailActions"
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -13,29 +13,33 @@ export const authOptions: NextAuthOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET,
     providers: [
-        // GithubProvider({
-        //     clientId: process.env.GITHUB_ID as string,
-        //     clientSecret: process.env.GITHUB_SECRET as string,
-        // }),
-        // GoogleProvider({
-        //     clientId: process.env.GOOGLE_ID as string,
-        //     clientSecret: process.env.GOOGLE_SECRET as string
-        // }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_ID as string,
+            clientSecret: process.env.GOOGLE_SECRET as string
+        }),
         Credentials({
             name: 'credentials',
             //@ts-ignore
             async authorize(credentials) {
-                const { email, password } = credentials as { email: string, password: string}
-                
+                const { email, password } = credentials as { email: string, password: string}  
                 await connectDB()
                 const checkExistUser = await Users.findOne({email: email})
                 if(checkExistUser) {
+                    if(checkExistUser.signup_method !== 'credentials') {
+                        throw new Error('This email signup using google!')
+                    }
                     const checkPassword = await bcrypt.compare(password, checkExistUser.password)
                     if(checkPassword) {
-                        return {
-                            username: checkExistUser?.username,
-                            email: checkExistUser?.email,
-                            role: checkExistUser?.role
+                        if(checkExistUser.is_verified && checkExistUser.signup_method === 'credentials') {
+                            return {
+                                name: checkExistUser?.username,
+                                email: checkExistUser?.email,
+                                role: checkExistUser?.role,
+                                isSubscribed: checkExistUser?.is_subscribed
+                            }
+                        } 
+                        if(!checkExistUser.is_verified) {
+                            throw new Error('Your email not verified. Verified now!')
                         }
                     } else {
                         throw new Error('Password incorrect, try again!')
@@ -47,17 +51,55 @@ export const authOptions: NextAuthOptions = {
         })
     ],
     callbacks: {
-        async signIn({account, profile}) {
+        async signIn({account, profile, user}) {
+            if(account?.provider === 'google') {
+                await connectDB()
+                const checkExistUser = await Users.findOne({email: profile?.email})
+                if(!checkExistUser) {
+                    await Users.create({
+                        email: profile?.email,
+                        username: profile?.name,
+                        image_profile: {
+                            image_profile_url: user.image
+                        },
+                        is_verified: true,
+                        signup_method: 'google'
+                    }).then(() => {
+                        receiveEmailWelcome(profile?.email as string)
+                    })
+                } 
+                return true
+            } 
             return true
         },
-        async jwt({token, user, account}: {token: any, user: any, account: any}) {
-            // if(user) {
-            //   token.role = account?.provider === "google" ? "user" : user.role
-            // }
+        //@ts-ignore
+        async jwt({token, user, account, profile, trigger, session}: {token: any, user: any, account: any, profile: any, trigger: any, session: any}) {
+            if(user) {
+                token.role = account?.provider === 'google' || account?.provider === 'github' ? 'user' : user.role
+            }
+            if(account?.provider === 'google') {
+                await connectDB()
+                const checkExistUser = await Users.findOne({email: profile?.email})
+                if(checkExistUser) {
+                    user.name = checkExistUser.username
+                    token.name = checkExistUser.username
+                    token.picture = checkExistUser.image_profile.image_profile_url,
+                    token.isSubscribed = checkExistUser.is_subscribed
+                }
+            }
+            if(trigger === 'update' && (session?.image === null || session?.image)) {
+                token.picture = session?.image
+            }
             return {...token, ...user}
         },
-        async session({session, token}) {
-            // session?.user?.role = token.role
+        async session({session, token, trigger, newSession}: {session: any, token: any, trigger: any, newSession: any}) {
+            session.user.role = token.role
+            session.user.name = token.name
+            session.user.image = token.picture
+            session.user.isSubscribed = token.isSubscribed
+            if(trigger === 'update') {
+                session.user.image = newSession.image
+            }
             return session
         },
     },

@@ -1,6 +1,7 @@
 import React from 'react'
 import Hero from '@/app/components/primary/hero'
 import Pricing from '@/app/components/primary/pricing'
+import PrimaryModal from '@/app/components/primary/primaryModal'
 
 export const metadata = {
     title: 'Homepage | SELFManaged'
@@ -10,6 +11,7 @@ const Homepage = () => {
         <section className='sub-container mb-32'>
             <Hero/>
             <Pricing/>
+            <PrimaryModal/>
         </section>
     )
 }

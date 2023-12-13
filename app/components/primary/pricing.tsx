@@ -1,12 +1,31 @@
 'use client'
 import React from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import toast, { Toaster } from 'react-hot-toast'
 import Button from '@/app/components/utils/button'
 import { featureList } from '@/app/utils/featuresList'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Pricing = () => {
+    const router = useRouter()
+    const { data } = useSession()
+
+    const handleClick = () => {
+        if(!data?.user) {
+            toast.error('You must be signin before subscribe')
+            setTimeout(() => {
+               router.push('/signin') 
+            }, 2000);
+        }
+    }
+
     return (
         <AnimatePresence>
+            <Toaster toastOptions={{
+                className: 'dark:bg-[#222] dark:!text-[#fff]',
+                duration: 2000
+            }}/>
             <section id='pricing' className='mt-20 px-3'>
                 <motion.h1 
                     initial={{ opacity: 0,y: 30 }} 
@@ -39,7 +58,7 @@ const Pricing = () => {
                                 <span className="ml-0.5 text-gray-500"> / unlimitted </span>
                             </div>
 
-                            <Button type='button' variant='primary-gradient' size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center'>
+                            <Button type='button' variant='primary-gradient' size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center' handleClick={handleClick}>
                                 Choose free plan
                             </Button>
 
@@ -76,7 +95,7 @@ const Pricing = () => {
                                     <span className="ml-0.5 text-gray-500"> / unlimitted </span>
                                 </div>
 
-                                <Button type='button' variant='primary-gradient' size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center'>
+                                <Button type='button' variant='primary-gradient' size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center' handleClick={handleClick}>
                                     Choose premium plan
                                 </Button>
 

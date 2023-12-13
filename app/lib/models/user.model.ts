@@ -13,11 +13,12 @@ const userSchema = new Schema({
     },
     image_profile: {
         image_profile_id: {
-            type: String
+            type: String,
+            default: null
         },
         image_profile_url: {
             type: String,
-            required: true
+            default: null
         }
     },
     password: {
@@ -25,17 +26,21 @@ const userSchema = new Schema({
     },
     is_verified: {
         type: Boolean,
-        default: false
     },
     is_subscribed: {
         type: String,
-        enum: ['free', 'premium'],
-        default: ''
+        enum: [null, 'free', 'premium'],
+        default: null
     },
     signup_method: {
         type: String,
         enum: ['credentials', 'google', 'github'],
         required: true
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
     }
 }, {
     timestamps: true

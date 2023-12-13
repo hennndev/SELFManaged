@@ -11,7 +11,7 @@ type PropsTypes = {
 
 const ModalConfirmation = ({title, btnTitle, variant, handleCancel}: PropsTypes) => {
     return (
-        <div id="popup-modal" tabIndex={-1} className="fixed z-[99] top-0 left-0 right-0 bottom-0 flex-center bg-[rgba(0,0,0,0.5)]">
+        <div tabIndex={-1} className="fixed z-[99] top-0 left-0 right-0 bottom-0 flex-center bg-[rgba(0,0,0,0.5)]">
             <div className="relative p-4 w-full max-w-md max-h-full">
                 <div className="relative bg-white rounded-lg shadow dark:bg-[#111]">
                     <button type="button" className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" data-modal-hide="popup-modal" onClick={handleCancel}>
