@@ -1,6 +1,3 @@
-
-
-
 export const cloudinaryFetch = async (image: File) => {
     const formDataImage = new FormData()
     const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
@@ -13,3 +10,4 @@ export const cloudinaryFetch = async (image: File) => {
     const result = await res.json()
     return result
 }
+

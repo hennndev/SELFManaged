@@ -34,6 +34,7 @@
     "react-international-phone": "^4.0.4",
     "react-toggle-dark-mode": "^1.1.1",
     "resend": "^2.0.0",
+    "stripe": "^14.10.0",
     "uuid": "^9.0.1",
     "zustand": "^4.4.6"
   },

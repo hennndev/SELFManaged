@@ -6,10 +6,39 @@ import toast, { Toaster } from 'react-hot-toast'
 import Button from '@/app/components/utils/button'
 import { featureList } from '@/app/utils/featuresList'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getStripe } from '@/app/lib/stripe/stripe'
+import { loadStripe, Stripe } from '@stripe/stripe-js'
 
 const Pricing = () => {
     const router = useRouter()
     const { data } = useSession()
+
+    const handleCheckout = async () => {
+        try {
+            const stripe = await getStripe();
+            const checkoutResponse = await fetch('/api/checkout_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userEmail: data?.user?.email
+                })
+            }).then(res => res.json())
+
+            console.log(checkoutResponse)
+
+            const { sessionId } = await checkoutResponse
+            const stripeError = await stripe!.redirectToCheckout({sessionId})
+
+            if (stripeError) {
+                console.error(stripeError);
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const handleClick = () => {
         if(!data?.user) {
@@ -17,9 +46,12 @@ const Pricing = () => {
             setTimeout(() => {
                router.push('/signin') 
             }, 2000);
+        } else {
+            handleCheckout()
         }
     }
-
+    const user: any = data?.user
+    
     return (
         <AnimatePresence>
             <Toaster toastOptions={{
@@ -58,7 +90,7 @@ const Pricing = () => {
                                 <span className="ml-0.5 text-gray-500"> / unlimitted </span>
                             </div>
 
-                            <Button type='button' variant='primary-gradient' size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center' handleClick={handleClick}>
+                            <Button type='button' variant={user?.isSubscribed === 'free' || user?.isSubscribed === 'premium' ? 'disabled' : 'primary-gradient'} size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center' handleClick={handleClick}>
                                 Choose free plan
                             </Button>
 
@@ -95,7 +127,7 @@ const Pricing = () => {
                                     <span className="ml-0.5 text-gray-500"> / unlimitted </span>
                                 </div>
 
-                                <Button type='button' variant='primary-gradient' size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center' handleClick={handleClick}>
+                                <Button type='button' variant={user?.isSubscribed === 'premium' ? 'disabled' : 'primary-gradient'} size='md' classes='px-4 py-3 font-semibold !rounded-full w-full mt-6 flex-center' handleClick={handleClick}>
                                     Choose premium plan
                                 </Button>
 
