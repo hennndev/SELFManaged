@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { BiExport } from "react-icons/bi"
 import Navbar from '@/app/components/navbar'
 import { GoChevronDown } from "react-icons/go"
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 import Pagination from '@/app/components/pagination'
 import { MdTableView, MdFilterList } from 'react-icons/md'
 import ColleaguesTable from '@/app/components/tables/colleaguesTable'

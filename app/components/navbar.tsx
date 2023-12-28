@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import DarkMode from '@/app/components/darkMode'
+import DarkMode from '@/app/components/ui/darkMode'
 import SearchInput from '@/app/components/utils/searchInput'
 import { AiOutlineBell, AiOutlineUser , AiOutlineMessage, AiOutlineQuestionCircle, AiOutlineMail } from 'react-icons/ai'
 
@@ -28,7 +28,7 @@ const Navbar = ({title}: {title: string}) => {
                     <AiOutlineUser className='navbar-icon'/>
                 </div>
                 <div className='icon-button mr-1'>
-                    <DarkMode/>
+                    <DarkMode size={20}/>
                 </div>
             </div>
         </header>

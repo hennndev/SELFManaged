@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { AnimatePresence } from 'framer-motion'
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 import { useSearchParams, notFound } from 'next/navigation'
 import UpdatePasswordForm from '@/app/components/forms/updatePasswordForm'
 import { verifiedAccount, changePassword } from '@/app/lib/actions/authActions'

@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from './utils/button'
+import Button from './ui/button'
 
 const Modal = () => {
   return (

@@ -90,6 +90,9 @@ export const authOptions: NextAuthOptions = {
             if(trigger === 'update' && (session?.image === null || session?.image)) {
                 token.picture = session?.image
             }
+            if(trigger === 'update' && session?.isSubscribed !== null) {
+                token.isSubscribed = session?.isSubscribed
+            }
             return {...token, ...user}
         },
         async session({session, token, trigger, newSession}: {session: any, token: any, trigger: any, newSession: any}) {
@@ -97,8 +100,11 @@ export const authOptions: NextAuthOptions = {
             session.user.name = token.name
             session.user.image = token.picture
             session.user.isSubscribed = token.isSubscribed
-            if(trigger === 'update') {
+            if(trigger === 'update' && newSession.image) {
                 session.user.image = newSession.image
+            }
+            if(trigger === 'update' && newSession.isSubscribed) {
+                session.user.isSubscribed = newSession.isSubscribed
             }
             return session
         },

@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link';
 import Navbar from '@/app/components/navbar'
 import { IoIosReturnLeft } from "react-icons/io"
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 import BreadCrumb from '@/app/components/utils/breadCrumb'
 import ColleagueForm from '@/app/components/forms/colleagueForm'
 

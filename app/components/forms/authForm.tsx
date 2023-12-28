@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import Alert from '@/app/components/utils/alert'
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 import { AnimatePresence, motion } from 'framer-motion'
 import LogoTitle from '@/app/components/utils/logoTitle'
 import { RxEyeClosed, RxEyeOpen } from "react-icons/rx"

@@ -2,7 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import Button from '../utils/button'
+import Button from '@/app/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Hero = () => {
@@ -33,7 +33,6 @@ const Hero = () => {
                             <Button type='button' variant='primary-gradient'>Get started</Button>
                         </Link>
                     </motion.div>
-
                 </div>
                 <motion.div 
                     initial={{ opacity: 0,x: 50 }} 

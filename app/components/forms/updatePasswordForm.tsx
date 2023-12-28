@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import Alert from '@/app/components/utils/alert'
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 import { RxEyeClosed, RxEyeOpen } from "react-icons/rx"
 
 type PropsTypes = {

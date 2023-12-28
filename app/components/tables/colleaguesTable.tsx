@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { useColleagueStore } from '@/app/store/zustand'
 import toast, { Toaster } from 'react-hot-toast'
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 import { MdModeEdit, MdDelete, MdStar } from "react-icons/md"
 import ModalDescriptions from '@/app/components/modals/modalDescriptions'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'

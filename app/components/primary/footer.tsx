@@ -4,8 +4,6 @@ import { TiSocialLinkedin } from "react-icons/ti"
 import { AnimatePresence, motion } from 'framer-motion'
 import { AiFillGithub, AiFillInstagram, AiOutlineTwitter } from "react-icons/ai"
 
-
-
 const Footer = () => {
     return (
         <AnimatePresence>

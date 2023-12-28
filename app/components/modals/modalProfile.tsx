@@ -1,51 +1,54 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import Button from '../utils/button'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import BottomNavAccountInfo from '@/app/components/utils/bottomNavAccountInfo'
-import { AiOutlineCamera, AiOutlineMail, AiOutlineUser, AiOutlineLock } from "react-icons/ai";
-
+import Button from '@/app/components/ui/button'
+import BottomOptions from '@/app/components/primary/bottomOptions'
+import { AiOutlineCamera, AiOutlineMail, AiOutlineUser, AiOutlineLock } from "react-icons/ai"
 
 type PropsTypes = {
     handleShowModal: (value: boolean) => void
 }
-
-const ModalEditProfile = ({handleShowModal}: PropsTypes) => {
+const ModalProfile = ({handleShowModal}: PropsTypes) => {
     const router = useRouter()
     const {data} = useSession()
-    const [isAccess, setIsAccess] = useState<boolean>(false)
+    const user: any = data?.user
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [showDropdown, setShowDropdown] = useState<boolean>(false)
+    const [showOptions, setShowOptions] = useState<boolean>(false)
     
     const handleNavigate = (route: string) => {
         handleShowModal(false)
         router.push(route)
     }
-    
-    const handleCloseModal = () => {
-        handleShowModal(false)
-    }
-
+    const handleCloseModal = () => handleShowModal(false)
     const handleChoosePlan = () => {
-        handleShowModal(false)
-        const pricing = document.getElementById('pricing') as HTMLElement
-        window.scrollTo(pricing?.offsetLeft, pricing?.offsetTop)
+        // if subscribe status not premium, will auto scrolled to prices section
+        if(user.isSubscribed !== 'premium') {
+            handleShowModal(false)
+            const pricing = document.getElementById('pricing') as HTMLElement
+            window.scrollTo(pricing?.offsetLeft, pricing?.offsetTop)
+        }
     }
 
     return (
         <div className="fixed z-[99] top-0 left-0 right-0 bottom-0 flex-center bg-[rgba(0,0,0,0.4)]">
             <div className="relative p-4 w-full max-w-md max-h-full">
                 <div className="relative bg-white rounded-lg shadow overflow-hidden dark:bg-[#111]">
-                    <div className='absolute bg-gradient-to-r from-fuchsia-600 to-blue-600 rounded-md px-12 py-2 transform -rotate-45 top-1 -left-[35px]'>
-                        <p>Pro</p>
-                    </div>
+                    {/* This element will showing, if user has been subscribed */}
+                    {user.isSubscribed ? (
+                        <div className='absolute bg-gradient-to-r from-fuchsia-600 to-blue-600 rounded-md px-16 py-2 transform -rotate-45 
+                        top-4 -left-[45px] -ml-[12px]'>
+                            <p className='text-white'>{user.isSubscribed === 'free' ? 'Free' : 'Pro'} plan</p>
+                        </div>
+                    ) : null}
+                    {/* overlay will showing if isLoading is true */}
                     {isLoading ? <div className='z-50 absolute w-full h-full top-0 bottom-0 right-0 bg-[rgba(0,0,0,0.3)]'></div> : null}
                     <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-[#222]">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white ml-auto">
                             Account
                         </h3>
+                        {/* Close icon modal */}
                         <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" onClick={handleCloseModal}>
                             <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                 <path stroke="currentColor" stroke-strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -57,12 +60,8 @@ const ModalEditProfile = ({handleShowModal}: PropsTypes) => {
                     <div className="py-4 px-4 sm:px-7 md:py-5 md:px-8">
                         <div className="flex-center">
                             <div className='relative w-[120px] h-[120px] rounded-full'>
-                                <Image 
-                                    fill 
-                                    className='w-full h-full rounded-full cursor-pointer object-contain'  
-                                    src={data?.user?.image ? data?.user?.image : 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} 
-                                    alt="image-profile" />
-                                <div className='absolute bottom-0 right-0 rounded-full p-2 bg-gradient-to-r from-fuchsia-500 to-blue-500 dark:from-fuchsia-600 dark:to-blue-600 hover:from-fuchsia-600 hover:to-blue-600 dark:hover:from-fuchsia-700 dark:hover:to-blue-700  cursor-pointer' onClick={() => setShowDropdown(!showDropdown)}>
+                                <Image fill className='w-full h-full rounded-full cursor-pointer object-contain' src={data?.user?.image ? data?.user?.image : 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} alt="image-profile" />
+                                <div className='absolute bottom-0 right-0 rounded-full p-2 bg-gradient-to-r from-fuchsia-500 to-blue-500 dark:from-fuchsia-600 dark:to-blue-600 hover:from-fuchsia-600 hover:to-blue-600 dark:hover:from-fuchsia-700 dark:hover:to-blue-700  cursor-pointer' onClick={() => setShowOptions(!showOptions)}>
                                     <AiOutlineCamera className='text-2xl text-gray-100'/>
                                 </div>
                             </div>
@@ -71,13 +70,13 @@ const ModalEditProfile = ({handleShowModal}: PropsTypes) => {
                         <div className='flex flex-col mt-10'>
                             <div className="flexx cursor-default hover:bg-gray-50 dark:hover:bg-[#222] p-3 rounded-md">
                                 <AiOutlineUser className='text-2xl text-gray-600 dark:text-gray-400 mr-5'/>
-                                <p className='text-gray-700 dark:text-gray-300'>
+                                <p className='flex-1 text-gray-700 dark:text-gray-300 line-clamp-2'>
                                     {data?.user?.name}
                                 </p>
                             </div>
                             <div className="flexx cursor-default hover:bg-gray-50 dark:hover:bg-[#222] p-3 rounded-md">
                                 <AiOutlineMail className='text-2xl text-gray-600 dark:text-gray-400 mr-5'/>
-                                <p className='text-gray-700 break-all dark:text-gray-300'>
+                                <p className='flex-1 text-gray-700 break-all dark:text-gray-300 line-clamp-2'>
                                     {data?.user?.email}
                                 </p>
                             </div>
@@ -88,25 +87,21 @@ const ModalEditProfile = ({handleShowModal}: PropsTypes) => {
                         </div>
                         <div className='flex-between mt-5'>
                             <Button type='button' variant='primary-gradient' handleClick={handleChoosePlan}>
-                                Become Pro
+                                {user.isSubscribed !== 'premium' ? 'Become Pro' : 'Customer Support'}
                             </Button>
-                            {/* <Button type='button' variant='primary-gradient' handleClick={handleChoosePlan}>
-                                Customer Support
-                            </Button> */}
                             <Button type='button' variant='outline' handleClick={handleCloseModal}>
                                 Close
                             </Button>
                         </div>
-                        <BottomNavAccountInfo 
+                        <BottomOptions 
                             isLoading={isLoading} 
                             setIsLoading={setIsLoading} 
-                            showDropdown={showDropdown}
-                            setShowBottomNav={setShowDropdown}/>
+                            showOptions={showOptions}
+                            handleCloseOptions={() => setShowOptions(false)}/>
                     </div>
                 </div>
             </div>  
         </div>
     )
 }
-
-export default ModalEditProfile
+export default ModalProfile

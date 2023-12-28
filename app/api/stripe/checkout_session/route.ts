@@ -14,7 +14,7 @@ export async function POST(request: Request, response: Response){
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: 'Free Plan SELFManaged',
+                            name: 'Pro Plan SELFManaged',
                         },
                         unit_amount: 500
                     },
@@ -25,9 +25,6 @@ export async function POST(request: Request, response: Response){
             success_url: `${headersList.get('origin')}/checkout-success`,
             cancel_url: `${headersList.get('origin')}`,
         })
-
-
-        console.log(session)
         return NextResponse.json({
             sessionId: session.id
         })

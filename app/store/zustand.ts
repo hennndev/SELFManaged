@@ -1,11 +1,11 @@
 import { create } from "zustand"
 
 type LayoutTypes = {
-    showModalEditProfile: boolean
-    handleShowmModalEditProfile: (value: boolean) => void
+    showModalProfile: boolean //in primary layout
+    handleShowModalProfile: (value: boolean) => void //in primary layout
 }
 
 export const useLayoutStore = create<LayoutTypes>((set) => ({
-    showModalEditProfile: false,
-    handleShowmModalEditProfile: (value: boolean) => set(() => ({showModalEditProfile: value}))
+    showModalProfile: false, //in primary layout
+    handleShowModalProfile: (value: boolean) => set(() => ({showModalProfile: value})) //in primary layout
 }))

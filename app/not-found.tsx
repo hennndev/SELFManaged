@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import Button from '@/app/components/utils/button'
+import Button from '@/app/components/ui/button'
 
 export const metadata = {
     title: "Page not found"
