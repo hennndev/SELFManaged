@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
                     if(checkPassword) {
                         if(checkExistUser.is_verified && checkExistUser.signup_method === 'credentials') {
                             return {
+                                userId: checkExistUser?._id,
                                 name: checkExistUser?.username,
                                 email: checkExistUser?.email,
                                 role: checkExistUser?.role,
@@ -75,30 +76,31 @@ export const authOptions: NextAuthOptions = {
         //@ts-ignore
         async jwt({token, user, account, profile, trigger, session}: {token: any, user: any, account: any, profile: any, trigger: any, session: any}) {
             if(user) {
-                token.role = account?.provider === 'google' || account?.provider === 'github' ? 'user' : user.role
+                token.role = account?.provider === 'google' ? 'user' : user.role
             }
             if(account?.provider === 'google') {
                 await connectDB()
                 const checkExistUser = await Users.findOne({email: profile?.email})
                 if(checkExistUser) {
+                    token.userId = checkExistUser._id
                     user.name = checkExistUser.username
                     token.name = checkExistUser.username
                     token.picture = checkExistUser.image_profile.image_profile_url,
                     token.isSubscribed = checkExistUser.is_subscribed
                 }
             }
-            if(trigger === 'update' && (session?.image === null || session?.image)) {
+            if(trigger === 'update' && (session.image === null || session.image)) {
                 token.picture = session?.image
-            }
-            if(trigger === 'update' && session?.isSubscribed !== null) {
+            } else if(trigger === 'update' && session.isSubscribed) {
                 token.isSubscribed = session?.isSubscribed
             }
             return {...token, ...user}
         },
         async session({session, token, trigger, newSession}: {session: any, token: any, trigger: any, newSession: any}) {
-            session.user.role = token.role
+            session.user.userId = token.userId
             session.user.name = token.name
             session.user.image = token.picture
+            session.user.role = token.role
             session.user.isSubscribed = token.isSubscribed
             if(trigger === 'update' && newSession.image) {
                 session.user.image = newSession.image

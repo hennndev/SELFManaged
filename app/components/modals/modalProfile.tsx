@@ -1,10 +1,10 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
-import BottomOptions from '@/app/components/primary/bottomOptions'
+import { useRouter, usePathname } from 'next/navigation'
+import BottomOptions from '@/app/components/ui/bottomOptions'
 import { AiOutlineCamera, AiOutlineMail, AiOutlineUser, AiOutlineLock } from "react-icons/ai"
 
 type PropsTypes = {
@@ -12,6 +12,7 @@ type PropsTypes = {
 }
 const ModalProfile = ({handleShowModal}: PropsTypes) => {
     const router = useRouter()
+    const pathname = usePathname()
     const {data} = useSession()
     const user: any = data?.user
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -24,6 +25,9 @@ const ModalProfile = ({handleShowModal}: PropsTypes) => {
     const handleCloseModal = () => handleShowModal(false)
     const handleChoosePlan = () => {
         // if subscribe status not premium, will auto scrolled to prices section
+        if(pathname.includes('dashboard')) {
+            router.push('/#pricing')
+        }
         if(user.isSubscribed !== 'premium') {
             handleShowModal(false)
             const pricing = document.getElementById('pricing') as HTMLElement
@@ -60,7 +64,7 @@ const ModalProfile = ({handleShowModal}: PropsTypes) => {
                     <div className="py-4 px-4 sm:px-7 md:py-5 md:px-8">
                         <div className="flex-center">
                             <div className='relative w-[120px] h-[120px] rounded-full'>
-                                <Image fill className='w-full h-full rounded-full cursor-pointer object-contain' src={data?.user?.image ? data?.user?.image : 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} alt="image-profile" />
+                                <Image fill sizes='100vw' className='w-full h-full rounded-full cursor-pointer object-contain' src={data?.user?.image ? data?.user?.image : 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} alt="image-profile" />
                                 <div className='absolute bottom-0 right-0 rounded-full p-2 bg-gradient-to-r from-fuchsia-500 to-blue-500 dark:from-fuchsia-600 dark:to-blue-600 hover:from-fuchsia-600 hover:to-blue-600 dark:hover:from-fuchsia-700 dark:hover:to-blue-700  cursor-pointer' onClick={() => setShowOptions(!showOptions)}>
                                     <AiOutlineCamera className='text-2xl text-gray-100'/>
                                 </div>

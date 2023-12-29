@@ -3,8 +3,9 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import Alert from '@/app/components/utils/alert'
+import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
+import Alert from '@/app/components/utils/alert'
 import { RxEyeClosed, RxEyeOpen } from "react-icons/rx"
 
 type PropsTypes = {
@@ -26,13 +27,15 @@ type FormTypes = {
 
 const UpdatePasswordForm = ({formTitle, isChange, onSubmit, isLoading, isSuccess, isError, handleClose}: PropsTypes) => {
 
+    const { data } = useSession()
+    const user: any = data?.user
     const [isFocus, setIsFocus] = useState<null | string>(null)
     const [showOldPassword, setShowOldPassword] = useState<boolean>(false)
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false)
     const [showNewPasswordConfirmation, setShowNewPasswordConfirmation] = useState<boolean>(false)
 
     const { register, handleSubmit, formState: {errors}, watch } = useForm<FormTypes>({defaultValues: {
-        email: isChange ? isChange : '',
+        email: isChange ? isChange : user?.email || '',
         oldPassword: '',
         newPassword: '',
         newPasswordConfirmation: ''

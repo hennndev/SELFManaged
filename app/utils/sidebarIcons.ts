@@ -5,51 +5,57 @@ export const sidebarIcons = [
     {
         Icon: AiOutlineHome,
         title: 'Dashboard',
-        route: ''
-    },
-    {
-        Icon: AiOutlineBarChart,
-        title: 'My Progress',
-        route: 'my-progress'
-    },
-    {
-        Icon: PiStudent,
-        title: 'My Courses',
-        route: 'my-courses'
+        route: 'dashboard'
     },
     {
         Icon: AiOutlineTeam,
         title: 'Colleague',
-        route: 'colleague'
-    },
-    {
-        Icon: AiOutlineTrophy,
-        title: 'Achievment',
-        route: 'achievment'
+        route: 'dashboard/colleague'
     },
     {
         Icon: AiOutlineDiff,
         title: 'My Planning',
-        route: 'my-planning'
+        route: 'dashboard/my-planning'
     },
     {
         Icon: AiOutlineOrderedList,
         title: 'Todo List',
-        route: 'todo-list'
+        route: 'dashboard/todo-list'
+    },
+    {
+        Icon: AiOutlineBarChart,
+        title: 'My Progress',
+        route: 'dashboard/my-progress',
+        plan: 'premium'
+    },
+    {
+        Icon: PiStudent,
+        title: 'My Courses',
+        route: 'dashboard/my-courses',
+        plan: 'premium'
+    },
+    {
+        Icon: AiOutlineTrophy,
+        title: 'Achievment',
+        route: 'dashboard/achievment',
+        plan: 'premium'
     },
     {
         Icon: AiOutlineFolderOpen,
         title: 'File Storage',
-        route: 'file-storage'
+        route: 'dashboard/file-storage',
+        plan: 'premium'
     },
     {
         Icon: AiOutlineLaptop,
         title: 'My Portfolio',
-        route: 'my-portfolio'
+        route: 'dashboard/my-portfolio',
+        plan: 'premium'
     },
     {
         Icon: AiOutlineFileText,
         title: 'URL List',
-        route: 'url-list'
+        route: 'dashboard/url-list',
+        plan: 'premium'
     }
 ]

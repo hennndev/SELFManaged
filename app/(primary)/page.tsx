@@ -8,11 +8,11 @@ export const metadata = {
 }
 const Homepage = () => {
     return (
-        <section className='sub-container mb-32'>
+        <main className='sub-container mb-32'>
             <Hero/>
             <Pricing/>
             <PrimaryModalContainer/>
-        </section>
+        </main>
     )
 }
 export default Homepage

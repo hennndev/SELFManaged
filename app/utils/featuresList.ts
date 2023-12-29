@@ -39,5 +39,9 @@ export const featureList = [
     {
         title: 'Portfolio Support',
         access: 'premium'
+    },
+    {
+        title: 'Progress Monitoring',
+        access: 'premium'
     }
 ]

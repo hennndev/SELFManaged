@@ -49,12 +49,3 @@ export const changeUserSubscribed = async (email: string, plan: 'free' | 'premiu
         console.log(error)
     }
 }
-
-export const testActionWebhook = async (data: any) => {
-    try {
-        console.log(data)
-    } catch (error) {
-        console.log(error)
-    }
-}
-

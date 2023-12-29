@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
 import toast, { Toaster } from 'react-hot-toast'
@@ -48,6 +48,17 @@ const Pricing = () => {
             }
         }
     }
+
+    useEffect(() => {
+        if(isModal) {
+            // if this modal showing, scrollable will hidden
+            document.body.style.overflowY = 'hidden'
+        } else {
+            // if this modal hidden, scrollable will be auto
+            document.body.style.overflowY = 'auto'
+        }
+    }, [isModal])
+    
 
 
     // NOTES: ❗❗

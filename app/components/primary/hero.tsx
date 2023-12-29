@@ -39,14 +39,14 @@ const Hero = () => {
                     whileInView={{ opacity: 1, x:0 }}
                     transition={{ duration: 0.3, delay: 0.4 }}
                     className='flex-center -mr-[350px] md:mr-0 w-[700px] overflow-visible mt-10'>
-                        <Image width={0} height={0} sizes='100vw' priority  className="w-full h-auto mx-auto rounded-lg shadow-xl" src="/images/dashboard-img.png" alt="dashboard-hero-img-1" />
+                        <Image  width={0} height={0} sizes='100vw' priority className="w-full h-auto mx-auto rounded-lg shadow-xl" src="/images/dashboard-img.png" alt="dashboard-hero-img-1" />
                 </motion.div>
                 <motion.div 
                     initial={{ opacity: 0,x: -50 }} 
                     whileInView={{ opacity: 1, x:0 }}
                     transition={{ duration: 0.3, delay: 0.5 }}
                     className='flex-center md:hidden -ml-[350px] w-[700px] overflow-visible mt-10'>
-                    <Image width={0} height={0} sizes='100vw' priority className=" w-full h-auto mx-auto rounded-lg shadow-xl" src="/images/dashboard-img.png" alt="dashboard-hero-img-2" />
+                    <Image  width={0} height={0} sizes='100vw' priority className=" w-full h-auto mx-auto rounded-lg shadow-xl" src="/images/dashboard-img.png" alt="dashboard-hero-img-2" />
                 </motion.div>
             </section>
         </AnimatePresence>

@@ -1,12 +1,10 @@
 'use client'
 import React, { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import UpdatePasswordForm from '@/app/components/forms/updatePasswordForm'
 import { changePassword } from '@/app/lib/actions/authActions'
 
 const UpdatePassword = () => {
-    const router = useRouter()
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isSuccess, setIsSuccess] = useState<null | string>(null)
     const [isError, setIsError] = useState<null | string>(null)

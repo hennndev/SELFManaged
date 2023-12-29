@@ -1,22 +1,23 @@
 'use client'
 import React, { useState } from 'react'
-import { useColleagueStore } from '@/app/store/zustand'
+import { useRouter } from 'next/navigation'
 import toast, { Toaster } from 'react-hot-toast'
 import Button from '@/app/components/ui/button'
+import { AnimatePresence, motion } from 'framer-motion'
 import { MdModeEdit, MdDelete, MdStar } from "react-icons/md"
 import ModalDescriptions from '@/app/components/modals/modalDescriptions'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 
 
 type PropsTypes = {
-    dataColleagues?: ColleaguesDataTypes
+    colleagues: ColleaguesDataTypes[]
 }
 
-const ColleaguesTable = ({dataColleagues}: PropsTypes) => {
+const ColleaguesTable = ({colleagues}: PropsTypes) => {
 
+    const router = useRouter()
     const [modalConfirmation, setModalConfirmation] = useState<boolean>(false)
     const [modalDescription, setModalDescription] = useState<boolean>(false)
-    const { colleagues, deleteColleague } = useColleagueStore()
 
     return (
         <>
@@ -36,60 +37,66 @@ const ColleaguesTable = ({dataColleagues}: PropsTypes) => {
                     </p>
                 </ModalDescriptions>
             ) : null}
-            <table className="table-auto min-w-full shadow-md rounded-md">
-                <thead>
-                    <tr className='bg-gray-50 dark:bg-[#222]'>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>No</th>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 max-w-[300px]'>Name</th>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Job</th>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Telp Number</th>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Address</th>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Description</th>
-                        <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tr-md'>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {colleagues.length > 0 ? colleagues?.map((colleague: ColleaguesDataTypes, index: number) => (
-                        <tr className='text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151515]' key={colleague?.id}>
-                            <td className='relative px-3 py-3 text-sm font-normal'>
-                                {index + 1}
-                                {colleague?.isFavorite === 'favorite' ? <MdStar className="absolute text-lg text-blue-500 top-4 -left-2"/> : ''}
-                            </td>
-                            <td className='px-3 py-3 text-sm font-normal'>{colleague?.name}</td>
-                            <td className='px-3 py-3 text-sm font-normal'>{colleague?.job}</td>
-                            <td className='px-3 py-3 text-sm font-normal'>{colleague?.telpNumber}</td>
-                            <td className='px-3 py-3 text-sm font-normal'>{colleague?.country}</td>
-                            <td className='px-3 py-3 text-sm font-normal'>
-                                <Button type='button' variant='outline' size='xs' handleClick={() => setModalDescription(true)}>
-                                    Description
-                                </Button>
-                            </td>
-                            <td className='px-3 py-3 flexx'>
-                                <div className="icon-button">
-                                    <MdModeEdit className='text-xl text-blue-700 dark:text-blue-500 cursor-pointer'/>
-                                </div>
-                                <div className="icon-button">
-                                    <MdDelete className='text-xl text-red-700 dark:text-red-500 cursor-pointer' onClick={()=> setModalConfirmation(true)}/>
-                                </div>
-                            </td>
+            <AnimatePresence>
+                <motion.table 
+                    initial={{opacity: 0, y: -100}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{duration: 0.3, delay: 0.2}}
+                    className="table-auto min-w-full shadow-md rounded-md">
+                    <thead>
+                        <tr className='bg-gray-50 dark:bg-[#222]'>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>No</th>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 max-w-[300px]'>Name</th>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Job</th>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Telp Number</th>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Address</th>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300'>Description</th>
+                            <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tr-md'>Action</th>
                         </tr>
-                    )) : (
-                        <tr className='text-gray-700'>
-                            <td className='px-3 py-3 text-sm font-normal relative'></td>
-                            <td className='px-3 py-3 text-sm font-normal'>''</td>
-                            <td className='px-3 py-3 text-sm font-normal'>''</td>
-                            <td className='px-3 py-3 text-sm font-normal'>''</td>
-                            <td className='px-3 py-3 text-sm font-normal'>''</td>
-                            <td className='px-3 py-3 text-sm font-normal'>
-                                ''
-                            </td>
-                            <td className='px-3 py-3 flexx'>
-                                ''
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {colleagues.length > 0 ? colleagues?.map((colleague: ColleaguesDataTypes, index: number) => (
+                            <tr className='text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151515]' key={colleague?._id}>
+                                <td className='relative px-3 py-3 text-sm font-normal'>
+                                    {index + 1}
+                                    {colleague?.is_favorite === 'favorite' ? <MdStar className="absolute text-lg text-blue-500 top-4 -left-2"/> : ''}
+                                </td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.name}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.job}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.phone_number}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.country}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>
+                                    <Button type='button' variant='outline' size='xs' handleClick={() => setModalDescription(true)}>
+                                        Description
+                                    </Button>
+                                </td>
+                                <td className='px-3 py-3 flexx'>
+                                    <div className="icon-button" onClick={() => router.push(`/dashboard/colleague/edit-colleague/${colleague._id}`)}>
+                                        <MdModeEdit className='text-xl text-blue-700 dark:text-blue-500 cursor-pointer'/>
+                                    </div>
+                                    <div className="icon-button" onClick={()=> setModalConfirmation(true)}>
+                                        <MdDelete className='text-xl text-red-700 dark:text-red-500 cursor-pointer'/>
+                                    </div>
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr className='text-gray-700'>
+                                <td className='px-3 py-3 text-sm font-normal relative'></td>
+                                <td className='px-3 py-3 text-sm font-normal'>''</td>
+                                <td className='px-3 py-3 text-sm font-normal'>''</td>
+                                <td className='px-3 py-3 text-sm font-normal'>''</td>
+                                <td className='px-3 py-3 text-sm font-normal'>''</td>
+                                <td className='px-3 py-3 text-sm font-normal'>
+                                    ''
+                                </td>
+                                <td className='px-3 py-3 flexx'>
+                                    ''
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </motion.table>
+            </AnimatePresence>
         </>
     )
 }

@@ -9,13 +9,23 @@ const colleagueSchema = new Schema({
     },
     colleagues: [
         {
-            id: {
-                type: String,
-                required: true,
-            },
             name: {
                 type: String,
                 required: true
+            },
+            email: {
+                type: String,
+                required: true
+            },
+            photo_profile: {
+                photo_profile_id: {
+                    type: String,
+                    default: null
+                },
+                photo_profile_url: {
+                    type: String,
+                    default: null
+                }
             },
             address: {
                 type: String,
@@ -25,7 +35,7 @@ const colleagueSchema = new Schema({
                 type: String,
                 required: true
             },
-            telp_number: {
+            phone_number: {
                 type: String,
                 required: true,
                 min: 8
@@ -45,4 +55,4 @@ const colleagueSchema = new Schema({
     timestamps: true
 })
 
-export const Colleague = mongoose.models.colleagueSchema || mongoose.model('Colleagues', colleagueSchema)
+export const Colleague = mongoose.models.Colleagues || mongoose.model('Colleagues', colleagueSchema)

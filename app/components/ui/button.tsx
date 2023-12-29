@@ -24,7 +24,7 @@ const Button = ({type, children, isLoading, size, variant, classes, ...props}: P
             variantTheme = 'bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 text-white'
             break
         case 'outline':
-            variantTheme = 'bg-transparent text-gray-700 border border-gray-200 dark:border-[#222] dark:text-gray-300 hover:border-gray-400 dark:hover:border-[#444] '  
+            variantTheme = 'bg-transparent text-gray-700 border border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 '  
             break
         case 'disabled':
             variantTheme = 'bg-gray-500 text-gray-200 cursor-default'

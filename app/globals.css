@@ -34,10 +34,10 @@
         @apply mb-2 text-gray-700 dark:text-gray-300
     }
     .input {
-        @apply border border-gray-200 dark:border-[#222] outline-none rounded-md p-2 bg-transparent focus:ring-[1.5px] focus:ring-blue-500 focus:border-transparent
+        @apply border border-gray-200 dark:border-gray-700 outline-none rounded-md p-2 bg-transparent focus:ring-[1.5px] focus:ring-blue-500 focus:border-transparent dark:focus:border-transparent
     }
     .input-error {
-        @apply border-2 border-red-500 dark:border-red-500 focus:border-red-500 ring-0 focus:ring-0
+        @apply border-2 border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500 ring-0 focus:ring-0
     }
     .input-msg-error {
         @apply text-red-700 dark:text-red-500 mt-1 font-medium
@@ -54,7 +54,7 @@
 
     /* navbar */
     .navbar-icon {
-        @apply text-xl text-gray-700 dark:text-gray-300 cursor-pointer
+        @apply text-2xl text-gray-700 dark:text-gray-300 cursor-pointer
     }
 
     /* button */

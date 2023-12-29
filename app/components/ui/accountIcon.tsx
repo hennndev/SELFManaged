@@ -2,19 +2,18 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useLayoutStore } from '@/app/store/zustand'
 
 type PropsTypes = {
-    imageUrl: null | string | undefined
-    logout: () => void
-    isLoading: boolean
-    isScrolled: boolean
+    isScrolled?: boolean
+    isDashboard?: boolean
 }
 
-const AccountIcon = ({imageUrl, logout, isLoading, isScrolled}: PropsTypes) => {
+const AccountIcon = ({isScrolled, isDashboard}: PropsTypes) => {
     const { data } = useSession()
     const user: any = data?.user
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [showDropdown, setShowDropdown] = useState<boolean>(false)
     const handleShowDropdown = () => setShowDropdown(!showDropdown)
     const { handleShowModalProfile } = useLayoutStore()
@@ -25,10 +24,15 @@ const AccountIcon = ({imageUrl, logout, isLoading, isScrolled}: PropsTypes) => {
             setShowDropdown(false)
         }
     }, [isScrolled])
+
+    const logout = () => {
+        setIsLoading(true)
+        signOut().then(() => setIsLoading(false)).catch(() => setIsLoading(false))
+    }
     
     return (
         <div className='relative h-[30px] w-[30px] rounded-full' onClick={handleShowDropdown}>
-            <Image fill className='w-full h-full rounded-full cursor-pointer object-contain' src={imageUrl || 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} alt="image-profile" />
+            <Image fill sizes='100vw' className='w-full h-full rounded-full cursor-pointer object-contain' src={user?.image || 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} alt="image-profile" />
 
             {/* dropdown will showing if parent has been clicked */}
             <div className={`absolute top-10 -left-20 z-10 ${!showDropdown ? 'hidden' : 'block'} overflow-hidden bg-white shadow rounded-lg w-44 dark:bg-[#222]`}>
@@ -38,7 +42,7 @@ const AccountIcon = ({imageUrl, logout, isLoading, isScrolled}: PropsTypes) => {
                         Account
                     </li>
                     {/* if user hasn't be subscribed, this option will not showing */}
-                    {user.isSubscribed ? (
+                    {user?.isSubscribed && !isDashboard ? (
                         <Link href='/dashboard' className='px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer dark:hover:text-white'>
                             Dashboard
                         </Link>
