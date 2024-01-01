@@ -9,7 +9,7 @@ export const featureList = [
         access: 'basic'
     },
     {
-        title: 'Planning Management',
+        title: 'Expense Management',
         access: 'basic'
     },
     {

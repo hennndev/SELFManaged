@@ -19,7 +19,7 @@ const Navbar = ({title}: {title: string}) => {
                     initial={{opacity: 0, y: -100}}
                     animate={{opacity: 1, y: 0}}
                     transition={{duration: 0.3}}
-                    className='sticky top-0 bg-white dark:bg-[#111] flex-between py-4 z-[50]'>
+                    className='sticky top-0 bg-white dark:bg-[#111] flex-between py-4 z-[50] px-7'>
                     <div className="flexx">
                         <h1 className='text-[18px] text-gray-700 dark:text-gray-300 font-medium mr-5'>{title}</h1>
                         <SearchInput/>

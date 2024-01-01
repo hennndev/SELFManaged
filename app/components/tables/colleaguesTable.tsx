@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { MdModeEdit, MdDelete, MdStar } from "react-icons/md"
 import ModalDescriptions from '@/app/components/modals/modalDescriptions'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'
+import { deleteColleague } from '@/app/lib/actions/colleague.actions'
+import { useSession } from 'next-auth/react'
 
 
 type PropsTypes = {
@@ -16,16 +18,36 @@ type PropsTypes = {
 const ColleaguesTable = ({colleagues}: PropsTypes) => {
 
     const router = useRouter()
-    const [modalConfirmation, setModalConfirmation] = useState<boolean>(false)
+    const { data } = useSession()
+    const user:any = data?.user 
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [modalConfirmation, setModalConfirmation] = useState<null | string>(null)
     const [modalDescription, setModalDescription] = useState<boolean>(false)
+
+    const handleDeleteColleague = async () => {
+        setIsLoading(true)
+        try {
+            const promise = await deleteColleague(user?.userId, modalConfirmation as string)
+            if(promise) {
+                setModalConfirmation(null)
+            }
+        } catch (error) {
+            toast.error('Something went wrong')
+            console.log(error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <>
             {modalConfirmation ? <ModalConfirmation 
-                title='Are you sure want to delete this colleague?' 
-                btnTitle='Delete now' 
                 variant='danger'
-                handleCancel={() => setModalConfirmation(false)}/> : null
+                btnTitle='Delete now' 
+                isLoading={isLoading}
+                title='Are you sure want to delete this colleague?'
+                handleClick={handleDeleteColleague} 
+                handleCancel={() => setModalConfirmation(null)}/> : null
             }
             {modalDescription ? (
                 <ModalDescriptions handleCancel={() => setModalDescription(false)}>
@@ -37,12 +59,16 @@ const ColleaguesTable = ({colleagues}: PropsTypes) => {
                     </p>
                 </ModalDescriptions>
             ) : null}
+            <Toaster toastOptions={{
+                className: 'dark:bg-[#222] dark:!text-[#fff]',
+                duration: 5000
+            }}/>
             <AnimatePresence>
                 <motion.table 
                     initial={{opacity: 0, y: -100}}
                     animate={{opacity: 1, y: 0}}
                     transition={{duration: 0.3, delay: 0.2}}
-                    className="table-auto min-w-full shadow-md rounded-md">
+                    className="table-auto min-w-full shadow-md rounded-md dark:bg-[#181818]">
                     <thead>
                         <tr className='bg-gray-50 dark:bg-[#222]'>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>No</th>
@@ -74,23 +100,23 @@ const ColleaguesTable = ({colleagues}: PropsTypes) => {
                                     <div className="icon-button" onClick={() => router.push(`/dashboard/colleague/edit-colleague/${colleague._id}`)}>
                                         <MdModeEdit className='text-xl text-blue-700 dark:text-blue-500 cursor-pointer'/>
                                     </div>
-                                    <div className="icon-button" onClick={()=> setModalConfirmation(true)}>
+                                    <div className="icon-button" onClick={()=> setModalConfirmation(colleague?._id)}>
                                         <MdDelete className='text-xl text-red-700 dark:text-red-500 cursor-pointer'/>
                                     </div>
                                 </td>
                             </tr>
                         )) : (
                             <tr className='text-gray-700'>
-                                <td className='px-3 py-3 text-sm font-normal relative'></td>
-                                <td className='px-3 py-3 text-sm font-normal'>''</td>
-                                <td className='px-3 py-3 text-sm font-normal'>''</td>
-                                <td className='px-3 py-3 text-sm font-normal'>''</td>
-                                <td className='px-3 py-3 text-sm font-normal'>''</td>
-                                <td className='px-3 py-3 text-sm font-normal'>
-                                    ''
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500 relative'>no data</td>
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500'>no data</td>
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500'>no data</td>
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500'>no data</td>
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500'>no data</td>
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500'>
+                                    no data
                                 </td>
-                                <td className='px-3 py-3 flexx'>
-                                    ''
+                                <td className='px-3 py-3 text-sm font-normal text-gray-400 dark:text-gray-500'>
+                                    no data
                                 </td>
                             </tr>
                         )}

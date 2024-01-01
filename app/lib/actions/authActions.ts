@@ -1,7 +1,7 @@
 'use server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { connectDB } from "@/app/lib/mongoose"
+import { connectDB } from "@/app/lib/utils/mongoose"
 import { Users } from '@/app/lib/models/user.model'
 import { receiveEmailVerification, receiveEmailResetPassword, receiveEmailWelcome } from './emailActions'
 

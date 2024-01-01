@@ -9,7 +9,7 @@ const EditColleague = () => {
 			<Navbar title="Edit Colleague"/>
 			<section className='mt-5'>
 				<ColleagueFormHeader/>
-				<ColleagueForm title="Edit colleague"/>
+				<ColleagueForm isEdit title="Edit colleague"/>
             </section>
 		</section>
 	)

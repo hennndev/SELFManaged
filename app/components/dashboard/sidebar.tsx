@@ -36,7 +36,7 @@ const Sidebar = () => {
                     initial={{opacity: 0, x: '-300px'}}
                     animate={{opacity: 1, x: 0}}
                     transition={{duration: 0.3}}
-                    className='flex flex-col h-screen w-[280px] sticky top-0 py-5 px-3 shadow-md'>
+                    className='flex flex-col h-screen w-[280px] sticky top-0 py-5 px-3 shadow-md dark:bg-[#181818] overflow-auto'>
                     <LogoTitle classes='text-2xl' delayTime='hidden'/>
                     {/* icons */}
                     <div className='text-gray-700 dark:text-gray-300 mt-5'>

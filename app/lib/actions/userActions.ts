@@ -1,7 +1,7 @@
 'use server'
-import { connectDB } from '../mongoose'
 import {v2 as cloudinary} from 'cloudinary'
 import {Users} from '@/app/lib/models/user.model'
+import { connectDB } from '@/app/lib/utils/mongoose'
 
 cloudinary.config({ 
   cloud_name: process.env.CLOUDINARY_NAME, 

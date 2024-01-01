@@ -22,3 +22,31 @@ type ColleaguesDataTypes = {
     country: string
     is_favorite: string
 }
+
+
+
+
+type TodoTypes = {
+    todoTitle: string
+    todoDescription?: string
+    todoDate: Date | string
+    todoTopics?: Array<string>
+}
+
+type TodoDataTypes = {
+    _id: string
+    title: string
+    description?:string
+    date: Date
+    topics: Array<string>
+    tasks: Array<string>
+}
+
+
+type TaskTypes = {
+    taskTitle: string,
+    taskDescription: string
+    taskTimeStart?: string
+    taskTimeEnd?: string
+    isImportant: boolean
+}

@@ -1,5 +1,7 @@
 import { PiStudent } from "react-icons/pi"
-import { AiOutlineHome, AiOutlineFileText, AiOutlineTeam, AiOutlineBarChart, AiOutlineTrophy, AiOutlineOrderedList, AiOutlineDiff, AiOutlineLaptop, AiOutlineFolderOpen } from "react-icons/ai"
+import { AiOutlineHome, AiOutlineFileText, AiOutlineTeam, AiOutlineBarChart, AiOutlineTrophy, AiOutlineOrderedList, AiOutlineDiff, AiOutlineLaptop, AiOutlineFolderOpen, AiOutlineLineChart } from "react-icons/ai"
+import { LuListTodo } from "react-icons/lu";
+
 
 export const sidebarIcons = [
     {
@@ -13,12 +15,12 @@ export const sidebarIcons = [
         route: 'dashboard/colleague'
     },
     {
-        Icon: AiOutlineDiff,
-        title: 'My Planning',
-        route: 'dashboard/my-planning'
+        Icon: AiOutlineLineChart,
+        title: 'Expense Manager',
+        route: 'dashboard/expense-manager'
     },
     {
-        Icon: AiOutlineOrderedList,
+        Icon: LuListTodo,
         title: 'Todo List',
         route: 'dashboard/todo-list'
     },

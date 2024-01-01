@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs'
 import NextAuth from "next-auth"
 import { NextAuthOptions } from 'next-auth'
-import { connectDB } from "@/app/lib/mongoose"
 import { Users } from "@/app/lib/models/user.model"
+import { connectDB } from "@/app/lib/utils/mongoose"
 import GoogleProvider from 'next-auth/providers/google'
 import Credentials from "next-auth/providers/credentials"
 import { receiveEmailWelcome } from "@/app/lib/actions/emailActions"
