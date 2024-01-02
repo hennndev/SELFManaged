@@ -1,28 +1,25 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, Fragment } from 'react'
+import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
-import toast, { Toaster } from 'react-hot-toast'
+import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MdModeEdit, MdDelete, MdStar } from "react-icons/md"
-import ModalDescriptions from '@/app/components/modals/modalDescriptions'
-import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 import { deleteColleague } from '@/app/lib/actions/colleague.actions'
-import { useSession } from 'next-auth/react'
-
+import ModalConfirmation from '@/app/components/modals/modalConfirmation'
+import ModalDescriptions from '@/app/components/modals/modalDescriptions'
 
 type PropsTypes = {
     colleagues: ColleaguesDataTypes[]
 }
-
 const ColleaguesTable = ({colleagues}: PropsTypes) => {
-
     const router = useRouter()
     const { data } = useSession()
-    const user:any = data?.user 
+    const user = data?.user as UserLoginTypes 
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [modalConfirmation, setModalConfirmation] = useState<null | string>(null)
-    const [modalDescription, setModalDescription] = useState<boolean>(false)
+    const [dataModalDescription, setDataModalDescription] = useState<null | ColleaguesDataTypes>(null)
 
     const handleDeleteColleague = async () => {
         setIsLoading(true)
@@ -30,39 +27,49 @@ const ColleaguesTable = ({colleagues}: PropsTypes) => {
             const promise = await deleteColleague(user?.userId, modalConfirmation as string)
             if(promise) {
                 setModalConfirmation(null)
+                toast.success('Success delete this colleague')
             }
         } catch (error) {
             toast.error('Something went wrong')
-            console.log(error)
         } finally {
             setIsLoading(false)
         }
     }
-
+   
     return (
-        <>
-            {modalConfirmation ? <ModalConfirmation 
+        <Fragment>
+            {/* if delete button clicked, this modal will showing. This modal for give confirmation to user want to delete or not */}
+            {modalConfirmation ? (<ModalConfirmation 
                 variant='danger'
                 btnTitle='Delete now' 
                 isLoading={isLoading}
                 title='Are you sure want to delete this colleague?'
                 handleClick={handleDeleteColleague} 
-                handleCancel={() => setModalConfirmation(null)}/> : null
-            }
-            {modalDescription ? (
-                <ModalDescriptions handleCancel={() => setModalDescription(false)}>
+                handleCancel={() => setModalConfirmation(null)}/> 
+            ): null}
+            {/* if description button clicked, description about colleague will showing */}
+            {dataModalDescription ? (
+                <ModalDescriptions handleClose={() => setDataModalDescription(null)}>
                     <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                        With less than a month to go before the European Union enacts new consumer privacy laws for its citizens, companies around the world are updating their terms of service agreements to comply.
+                        Name: {dataModalDescription.name}
                     </p>
                     <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                        The European Unions General Data Protection Regulation (G.D.P.R.) goes into effect on May 25 and is meant to ensure a common set of data rights in the European Union. It requires organizations to notify users as soon as possible of high-risk data breaches that could personally affect them.
+                        Email: {dataModalDescription.email}
+                    </p>
+                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                        Job: {dataModalDescription.job}
+                    </p>
+                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                        Phone Number: {dataModalDescription.phone_number}
+                    </p>
+                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                        Address: {dataModalDescription.address}
+                    </p>
+                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                        Country: {dataModalDescription.country}
                     </p>
                 </ModalDescriptions>
             ) : null}
-            <Toaster toastOptions={{
-                className: 'dark:bg-[#222] dark:!text-[#fff]',
-                duration: 5000
-            }}/>
             <AnimatePresence>
                 <motion.table 
                     initial={{opacity: 0, y: -100}}
@@ -82,17 +89,17 @@ const ColleaguesTable = ({colleagues}: PropsTypes) => {
                     </thead>
                     <tbody>
                         {colleagues.length > 0 ? colleagues?.map((colleague: ColleaguesDataTypes, index: number) => (
-                            <tr className='text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151515]' key={colleague?._id}>
+                            <tr className='text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222]' key={colleague._id}>
                                 <td className='relative px-3 py-3 text-sm font-normal'>
                                     {index + 1}
-                                    {colleague?.is_favorite === 'favorite' ? <MdStar className="absolute text-lg text-blue-500 top-4 -left-2"/> : ''}
+                                    {colleague.is_favorite === 'favorite' ? <MdStar className="absolute text-lg text-blue-500 top-4 -left-2"/> : ''}
                                 </td>
-                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.name}</td>
-                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.job}</td>
-                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.phone_number}</td>
-                                <td className='px-3 py-3 text-sm font-normal'>{colleague?.country}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague.name}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague.job}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague.phone_number}</td>
+                                <td className='px-3 py-3 text-sm font-normal'>{colleague.country}</td>
                                 <td className='px-3 py-3 text-sm font-normal'>
-                                    <Button type='button' variant='outline' size='xs' handleClick={() => setModalDescription(true)}>
+                                    <Button type='button' variant='outline' size='xs' handleClick={() => setDataModalDescription(colleague)}>
                                         Description
                                     </Button>
                                 </td>
@@ -100,7 +107,7 @@ const ColleaguesTable = ({colleagues}: PropsTypes) => {
                                     <div className="icon-button" onClick={() => router.push(`/dashboard/colleague/edit-colleague/${colleague._id}`)}>
                                         <MdModeEdit className='text-xl text-blue-700 dark:text-blue-500 cursor-pointer'/>
                                     </div>
-                                    <div className="icon-button" onClick={()=> setModalConfirmation(colleague?._id)}>
+                                    <div className="icon-button" onClick={()=> setModalConfirmation(colleague._id)}>
                                         <MdDelete className='text-xl text-red-700 dark:text-red-500 cursor-pointer'/>
                                     </div>
                                 </td>
@@ -123,7 +130,7 @@ const ColleaguesTable = ({colleagues}: PropsTypes) => {
                     </tbody>
                 </motion.table>
             </AnimatePresence>
-        </>
+        </Fragment>
     )
 }
 

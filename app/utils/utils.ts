@@ -27,7 +27,7 @@ export const todoTopics: Array<Record<string, string>> = [
     },
     {
         id: 'shopping',
-        value: 'Shopping'
+        value: 'Shopping 🛍️'
     },
     {
         id: 'go-to-school',

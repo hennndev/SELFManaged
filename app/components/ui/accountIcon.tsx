@@ -32,7 +32,7 @@ const AccountIcon = ({isScrolled, isDashboard}: PropsTypes) => {
     
     return (
         <div className='relative h-[30px] w-[30px] rounded-full' onClick={handleShowDropdown}>
-            <Image fill sizes='100vw' className='w-full h-full rounded-full cursor-pointer object-contain' src={user?.image || 'https://fisika.uad.ac.id/wp-content/uploads/blank-profile-picture-973460_1280.png'} alt="image-profile" />
+            <Image fill sizes='auto' className='w-full h-full rounded-full cursor-pointer object-contain' src={user?.image || '/images/blank-profile.png'} alt="image-profile" />
 
             {/* dropdown will showing if parent has been clicked */}
             <div className={`absolute top-10 -left-20 z-10 ${!showDropdown ? 'hidden' : 'block'} overflow-hidden bg-white shadow rounded-lg w-44 dark:bg-[#222]`}>

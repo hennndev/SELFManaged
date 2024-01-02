@@ -1,6 +1,10 @@
 import React from 'react'
 import Navbar from '@/app/components/dashboard/navbar'
 
+export const metadata = {
+	title: 'Dashboard | SELFManaged'
+}
+
 const Home = () => {
 	return (
 		<section className='flex-1 py-2 px-7'>

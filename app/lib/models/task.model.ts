@@ -3,6 +3,10 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 const taskSchema = new Schema({
+    todoId: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: true
@@ -24,9 +28,13 @@ const taskSchema = new Schema({
     is_important: {
         type: Boolean,
         default: false
+    },
+    is_done: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
 })
 
-export const Task = mongoose.models.Task || mongoose.model('Task', taskSchema)
+export const Task = mongoose.models.Task || mongoose.model<TaskDataTypes>('Task', taskSchema)

@@ -1,30 +1,24 @@
 'use client'
+import toast from 'react-hot-toast'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
-import { todoTopics } from '@/app/utils/utils'
 import Button from '@/app/components/ui/button'
-import toast, { Toaster } from 'react-hot-toast'
 import ModalWrapper from '@/app/components/wrapper/modalWrapper'
 import { addTask, editTask } from '@/app/lib/actions/taskActions'
 
 type PropsTypes = {
+    isTodoPage?: boolean
     todoId: string
+    isEdit?: boolean
     handleClose: () => void
 }
-type FormTypes = {
-    taskTitle: string
-    taskTimeStart: any
-    taskTimeEnd: any
-    taskDescription: string,
-    isImportant: boolean
-}
 
-const ModalTaskForm = ({todoId, handleClose}: PropsTypes) => {
-    const { data }: any = useSession()
-    const user = data?.user 
+const ModalTaskForm = ({isTodoPage, todoId, handleClose}: PropsTypes) => {
+    const { data } = useSession()
+    const user = data?.user as UserLoginTypes
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const { register, formState: {errors}, handleSubmit, clearErrors, reset } = useForm<FormTypes>({defaultValues: {
+    const { register, formState: {errors}, handleSubmit, clearErrors, reset } = useForm<TaskTypes>({defaultValues: {
         taskTitle: '',
         taskTimeStart: '',
         taskTimeEnd: '',
@@ -36,17 +30,17 @@ const ModalTaskForm = ({todoId, handleClose}: PropsTypes) => {
         clearErrors()
         reset()
     }
-
-    const onSubmit = async (values: FormTypes) => {
+    const onSubmit = async (values: TaskTypes) => {
         setIsLoading(true)
         try {
-            const response = await addTask(user.userId as string, todoId, values)
+            const response = await addTask(user.userId as string, todoId, values, isTodoPage)
             if(response) {
                 toast.success('Success add new task')
                 clearForm()
+                handleClose()
             }
-        } catch (error) {
-            console.log(error)
+        } catch (error: any) {
+            toast.error(error.message)
         } finally {
             setIsLoading(false)
         }
@@ -54,10 +48,9 @@ const ModalTaskForm = ({todoId, handleClose}: PropsTypes) => {
 
     return (
         <ModalWrapper>
-            <Toaster/>
-            {isLoading ? <div className='loading-overlay'></div> : null}
+            {isLoading ? <div className='overlay-loading'></div> : null}
             <div className="flex justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
                     Add new task <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Time field and description is optional, you can empty that field</span>
                 </h3>
                 <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" onClick={handleClose}>

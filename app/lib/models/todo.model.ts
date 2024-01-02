@@ -1,11 +1,13 @@
-import mongoose from "mongoose"
+import { Schema, models, model, PopulatedDoc, Document } from "mongoose"
 
-
-const Schema = mongoose.Schema
+type TodoModelTypes = {
+    user: string
+    tasks: PopulatedDoc<TaskDataTypes & Document>
+}
 
 const todoSchema = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Users'
     },
     todos: [
@@ -20,7 +22,7 @@ const todoSchema = new Schema({
                 default: null
             },
             date: {
-                type: Date,
+                type: String,
                 required: true
             },
             // optional
@@ -32,7 +34,7 @@ const todoSchema = new Schema({
             // default []
             tasks: [
                 {
-                    type: mongoose.Schema.Types.ObjectId,
+                    type: Schema.Types.ObjectId,
                     ref: 'Task',
                 }
             ]
@@ -43,4 +45,4 @@ const todoSchema = new Schema({
 })
 
 
-export const Todo = mongoose.models.Todos || mongoose.model('Todos', todoSchema)
+export const Todo = models.Todos || model<TodoModelTypes>('Todos', todoSchema)

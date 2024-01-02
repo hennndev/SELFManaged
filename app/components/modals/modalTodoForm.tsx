@@ -1,29 +1,33 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import moment from 'moment'
+import toast from 'react-hot-toast'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
 import { todoTopics } from '@/app/utils/utils'
 import Button from '@/app/components/ui/button'
-import toast, { Toaster } from 'react-hot-toast'
-import { addTodo } from '@/app/lib/actions/todoActions'
+import { useModalEditStore } from '@/app/store/zustand'
 import ModalWrapper from '@/app/components/wrapper/modalWrapper'
+import { addTodo, editTodo } from '@/app/lib/actions/todoActions'
 
 type PropsTypes = {
-    isEdit?: boolean
-    handleClose: () => void
+    isTodoPage?: boolean
+    isEdit?: boolean //just for edit todo action
+    handleClose: () => void //close todo modal
 }
 
-const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
+const ModalTodoForm = ({isTodoPage, isEdit, handleClose}: PropsTypes) => {
 
     const { data } = useSession()
-    const user: any = data?.user
-    const { register, formState: {errors}, handleSubmit, clearErrors, reset } = useForm<TodoTypes>({defaultValues: {
+    const user = data?.user as UserLoginTypes
+    const { register, formState: {errors}, setValue, handleSubmit, clearErrors, reset } = useForm<TodoTypes>({defaultValues: {
         todoTitle: '',
         todoDate: '',
         todoDescription: '',
         todoTopics: []
     }})
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const { dataEdit } = useModalEditStore()
 
     const clearForm = () => {
         clearErrors()
@@ -31,30 +35,56 @@ const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
         handleClose()
     }
 
+    const handleAdd = (values: TodoTypes) => {
+        return addTodo(user.userId as string, {
+            ...values,
+            todoDate: moment(values.todoDate).format('YYYY-MM-DD')
+        })
+    }
+    const handleEdit = (values: TodoTypes) => {
+        return editTodo(user.userId as string, dataEdit._id, {
+            ...values,
+            todoDate: moment(values.todoDate).format('YYYY-MM-DD')
+        }, isTodoPage)
+    }
+
     const onSubmit = async (values: TodoTypes) => {
         setIsLoading(true)
+        let promise
         try {
-            const response = await addTodo(user.userId as string, values)
-            console.log('Whahahahaha')
-            if(response) {
+            if(isEdit) {
+                promise = await handleEdit(values)
+            } else {
+                promise = await handleAdd(values)
+            }
+            if(promise) {
                 clearForm()
-                toast.success('Success add new todo')
+                handleClose()
+                toast.success(`${isEdit ? 'Success edit todo' : 'Success add new todo'}`)
             }
         } catch (error: any) {
-            console.log(error)
             toast.error(error.message)
         } finally {
             setIsLoading(false)
         }
     }
 
+    useEffect(() => {
+        // Side effect triggered when isEdit props is true
+        if(isEdit) {
+            setValue('todoTitle', dataEdit.todoTitle)
+            setValue('todoDescription', dataEdit.todoDescription)
+            setValue('todoDate', dataEdit.todoDate)
+            setValue('todoTopics', dataEdit.todoTopics)
+        }
+    }, [isEdit])
+
     return (
         <ModalWrapper>
-            <Toaster/>
             {isLoading ? <div className='overlay-loading'></div> : null}
             <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Add new todo <br /><span className='text-sm font-normal'>Description field is optional, you can empty that field</span>
+                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                    Add new todo <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field is optional, you can empty that field</span>
                 </h3>
                 <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" onClick={handleClose}>
                     <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -77,6 +107,8 @@ const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
                             {...register('todoDate', {
                                 required: 'Field is required'
                             })}
+                            min={moment(new Date()).format('YYYY-MM-DD')}
+                            max={moment(new Date()).add(30, 'days').format('YYYY-MM-DD')}
                             className={`input-border-bottom text-lg ${errors.todoDate?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
                     <div className='mb-3'>

@@ -1,13 +1,13 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+'use client'
+import React, { useState, useEffect, Fragment } from 'react'
+import toast from 'react-hot-toast'
 import 'react-international-phone/style.css'
 import { useSession } from 'next-auth/react'
-import toast, { Toaster } from 'react-hot-toast'
 import Button from '@/app/components/ui/button'
 import { jobOptions } from '@/app/utils/jobOptions'
 import { useForm, Controller } from 'react-hook-form'
 import { PhoneInput } from 'react-international-phone'
+import { useParams, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CountryDropdown } from 'react-country-region-selector'
 import { addNewColleague, getColleague, editColleague } from '@/app/lib/actions/colleague.actions'
@@ -16,15 +16,16 @@ type PropsTypes = {
     title: string,
     isEdit?: boolean
 }
+type FormTypes = ColleagueTypes & { jobOthers: string}
  
 const ColleagueForm = ({title, isEdit}: PropsTypes) => {
-    
     const params = useParams()
+    const router = useRouter()
     const { data } = useSession()
-    const user: any = data?.user
+    const user = data?.user as UserLoginTypes
     const [isFocus, setIsFocus] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const {register, formState: {errors}, setValue, clearErrors, reset,  handleSubmit, control, watch} = useForm<ColleagueTypes & {jobOthers: string}>({defaultValues: {
+    const {register, formState: {errors}, setValue, clearErrors, reset,  handleSubmit, control, watch} = useForm<FormTypes>({defaultValues: {
         email: "",
         name: "",
         address: "",
@@ -39,29 +40,41 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
         clearErrors()
         reset()
     }
-    const onSubmit = async (values: ColleagueTypes & {jobOthers: string}) => {
+    const handleAdd = (formValues: ColleagueTypes, jobOthers: string) => {
+        return addNewColleague(user?.userId, {
+            ...formValues,
+            job: formValues.job === 'Others' ? jobOthers : formValues.job
+        })
+    }
+    const handleEdit = (formValues: ColleagueTypes, jobOthers: string) => {
+        return editColleague(user?.userId, params.colleagueId as string, {
+            ...formValues,
+            job: formValues.job === 'Others' ? jobOthers : formValues.job
+        })
+    }
+
+    const onSubmit = async (values: FormTypes) => {
         setIsLoading(true)
         try {
             const {jobOthers, ...formValues} = values
             let promise
             if(!isEdit) {
-                promise = await addNewColleague(user?.userId, {
-                    ...formValues,
-                    job: formValues.job === 'Others' ? values.jobOthers : formValues.job
-                })
+                // if not from edit page, will run this function
+                promise = await handleAdd(formValues, jobOthers)
             } else {
-                promise = await editColleague(user?.userId, params.colleagueId as string, {
-                    ...formValues,
-                    job: formValues.job === 'Others' ? values.jobOthers : formValues.job
-                })
+                // if from edit page, will run this function
+                promise = await handleEdit(formValues, jobOthers)
             }
             if(promise) {
                 toast.success('Success add new colleague')
                 onReset()
+                setTimeout(() => {
+                    toast.dismiss()
+                    router.push('/dashboard/colleague')
+                }, 2000);
             }
-        } catch (error) {
-            console.log(error)
-            toast.error('Something went wrong')   
+        } catch (error: any) {
+            toast.error(error.message)   
         } finally {
             setIsLoading(false)
         }
@@ -83,23 +96,17 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
                     setValue('phoneNumber', colleague.phone_number)
                     setValue('country', colleague.country)
                     setValue('isFavorite', colleague.is_favorite)
+                } else {
+                    // if colleague undefined, will redirect to coleague page. (This scenario to avoid if user typing random params in url address)
+                    router.push('/dashboard/colleague')
                 }
             }
             handleGetColleague()
         }
     }, [params.colleagueId, user?.userId])
-
-    useEffect(() => {
-        // Dismiss all active toasts
-        toast.dismiss()
-       }, [])
     
     return (
-        <>
-            <Toaster toastOptions={{
-                className: 'dark:bg-[#222] dark:!text-[#fff]',
-                duration: 3000
-            }}/>
+        <Fragment>
             <AnimatePresence>
                 <motion.div 
                     initial={{opacity: 0, y: -100}}
@@ -252,7 +259,7 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
                     </form>
                 </motion.div>
             </AnimatePresence>
-        </>
+        </Fragment>
     )
 }
 

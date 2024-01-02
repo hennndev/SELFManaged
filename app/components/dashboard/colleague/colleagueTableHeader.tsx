@@ -16,18 +16,22 @@ const ColleagueTableHeader = () => {
                 transition={{duration: 0.3, delay: 0.1}}
                 className='mb-7 flex-between'>
                 <div className="flexx space-x-3">
+                    {/* soon this feature will appear */}
                     <Button type='button' variant='outline' size='sm'>
                         <MdFilterList className='text-lg mr-2 text-gray-700 dark:text-gray-300'/>
                         Filter Table
                     </Button>
+                    {/* soon this feature will appear */}
                     <Button type='button' variant='outline' size='sm'>
                         <GoChevronDown className='text-lg mr-2 text-gray-700 dark:text-gray-300'/>
                         Sort by
                     </Button>
+                    {/* soon this feature will appear */}
                     <Button type='button' variant='outline' size='sm'>
                         <MdTableView className='text-lg mr-2 text-gray-700 dark:text-gray-300'/>
                         Change table views
                     </Button>
+                    {/* soon this feature will appear */}
                     <Button type='button' variant='outline' size='sm'>
                         <BiExport className='text-lg mr-2 text-gray-700 dark:text-gray-300'/>
                         Export table

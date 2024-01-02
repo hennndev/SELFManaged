@@ -3,22 +3,25 @@ import { revalidatePath } from "next/cache"
 import { connectDB } from "@/app/lib/utils/mongoose"
 import { Colleague } from "@/app/lib/models/colleague.model"
 
-
 export const getColleagues = async (userId: string) => {
     await connectDB()
-    const data: any = await Colleague.findOne({user: userId}).lean()
+    const data: any = await Colleague.findOne({user: userId}).lean().select('-updatedAt -createdAt -__v')
     try {
         if(data) {
-            // const data: any = await Colleague.findOne({user: userId}).lean()
             return {
-                colleagues: data?.colleagues
+                colleagues: data?.colleagues.map((colleague: ColleaguesDataTypes) => {
+                    return {
+                        ...colleague,
+                        _id: colleague._id.toString()
+                    }
+                }) as ColleaguesDataTypes[]
             }
         } else {
             throw new Error('Colleagues not yet has created!')
         }
     } catch (error: any) {
         return {
-            error: error.message
+            error: error.message as string
         }   
     }
 }
@@ -26,12 +29,17 @@ export const getColleagues = async (userId: string) => {
 export const getColleague = async (userId: string, colleagueId: string) => {
     await connectDB()
     try {
-        const dataColleagues: any = await Colleague.findOne({user: userId}).lean()
-        const colleague = dataColleagues?.colleagues?.find((coll: any) => coll._id.toString() === colleagueId)
-        return colleague
-    } catch (error) {
-        console.log(error)
-        throw new Error('Something went wrong')        
+        const data: any = await Colleague.findOne({user: userId}).lean()
+        const colleague = data?.colleagues?.find((coll: ColleaguesDataTypes) => coll._id.toString() === colleagueId)
+        const transformedColleague = {
+            ...colleague,
+            _id: colleague._id.toString()
+        }
+        return transformedColleague 
+    } catch (error: any) {
+        return {
+            error: error.message as string
+        }    
     }
 }
 
@@ -59,9 +67,8 @@ export const addNewColleague = async (userId: string, newColleague: ColleagueTyp
         }
         revalidatePath('/dashboard/colleague')
         return true
-    } catch (error) {
-        console.log(error)
-        throw new Error('Something went wrong')   
+    } catch (error: any) {
+        throw new Error(error.message)   
     }
 }
 
@@ -70,8 +77,8 @@ export const editColleague = async (userId: string, colleagueId: string, colleag
     try {
         await Colleague.updateOne({user: userId, colleagues: {$elemMatch: {_id: colleagueId}}}, {
             $set: {
-                "colleagues.$.email": colleagueUpdated.email,
                 "colleagues.$.name": colleagueUpdated.name,
+                "colleagues.$.email": colleagueUpdated.email,
                 "colleagues.$.address": colleagueUpdated.address,
                 "colleagues.$.job": colleagueUpdated.job,
                 "colleagues.$.phone_number": colleagueUpdated.phoneNumber,
@@ -81,9 +88,8 @@ export const editColleague = async (userId: string, colleagueId: string, colleag
         })    
         revalidatePath('/dashboard/colleague/edit-colleague/[colleagueId]')
         return true
-    } catch (error) {
-        console.log(error)
-        console.log('Something went wrong')
+    } catch (error: any) {
+        throw new Error(error.message)
     }
 }
 
@@ -96,9 +102,8 @@ export const deleteColleague = async (userId: string, colleagueId: string) => {
         })
         revalidatePath('/dashboard/colleague')
         return true
-    } catch (error) {
-        console.log(error)
-        throw new Error('Something went wrong')
+    } catch (error: any) {
+        throw new Error(error.message)
     }
 }
 

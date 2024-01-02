@@ -1,6 +1,5 @@
 "use client"
-import React from 'react'
-import { useSession } from 'next-auth/react'
+import React, { Fragment } from 'react'
 import DarkMode from '@/app/components/ui/darkMode'
 import { AnimatePresence, motion} from 'framer-motion'
 import AccountIcon from '@/app/components/ui/accountIcon'
@@ -9,10 +8,8 @@ import PrimaryModalContainer from '../primary/primaryModalContainer'
 import { MdEmail, MdMessage, MdNotifications } from "react-icons/md"
 
 const Navbar = ({title}: {title: string}) => {
-    const { data } = useSession()
-    const user: any = data?.user 
     return (
-        <>
+        <Fragment>
             <PrimaryModalContainer/>
             <AnimatePresence>
                 <motion.header 
@@ -43,7 +40,7 @@ const Navbar = ({title}: {title: string}) => {
                     </div>
                 </motion.header>
             </AnimatePresence>
-        </>
+        </Fragment>
   )
 }
 

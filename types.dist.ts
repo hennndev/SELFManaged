@@ -1,4 +1,14 @@
-interface ColleagueTypes {
+type UserLoginTypes = {
+    name: string
+    email: string
+    image: string | null
+    userId: string
+    role: 'user' | 'admin'
+    isSubscribed: null | 'free' | 'premium'
+}
+
+// this types for forms
+type ColleagueTypes = {
     email: String
     name: string
     address: string
@@ -8,12 +18,13 @@ interface ColleagueTypes {
     isFavorite: string
 }
 
+// this types for database
 type ColleaguesDataTypes = {
     _id: string
     email: String
     photo_profile: {
-        photo_profile_id: String | null,
-        photo_profile_url: String | null
+        photo_profile_id: string | null,
+        photo_profile_url: string | null
     }
     name: string
     address: string
@@ -24,8 +35,7 @@ type ColleaguesDataTypes = {
 }
 
 
-
-
+// this type for todo form
 type TodoTypes = {
     todoTitle: string
     todoDescription?: string
@@ -33,13 +43,14 @@ type TodoTypes = {
     todoTopics?: Array<string>
 }
 
+// this type for database
 type TodoDataTypes = {
     _id: string
     title: string
-    description?:string
-    date: Date
+    description?:string | null
+    date: string
     topics: Array<string>
-    tasks: Array<string>
+    tasks: Array<TaskDataTypes>
 }
 
 
@@ -49,4 +60,17 @@ type TaskTypes = {
     taskTimeStart?: string
     taskTimeEnd?: string
     isImportant: boolean
+}
+
+type TaskDataTypes = {
+    todoId: string
+    _id: string
+    title: string
+    description: string | null
+    time: {
+        time_start: string | null
+        time_end: string | null
+    }
+    is_important: boolean
+    is_done: boolean
 }
