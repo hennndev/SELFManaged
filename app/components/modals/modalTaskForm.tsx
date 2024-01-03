@@ -1,42 +1,58 @@
 'use client'
+import React, { useState, useEffect, ChangeEvent } from 'react'
 import toast from 'react-hot-toast'
-import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
 import ModalWrapper from '@/app/components/wrapper/modalWrapper'
 import { addTask, editTask } from '@/app/lib/actions/taskActions'
+import { useModalEditStore } from '@/app/store/zustand'
 
 type PropsTypes = {
-    isTodoPage?: boolean
     todoId: string
     isEdit?: boolean
     handleClose: () => void
 }
 
-const ModalTaskForm = ({isTodoPage, todoId, handleClose}: PropsTypes) => {
+const ModalTaskForm = ({todoId, isEdit, handleClose}: PropsTypes) => {
     const { data } = useSession()
     const user = data?.user as UserLoginTypes
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const { register, formState: {errors}, handleSubmit, clearErrors, reset } = useForm<TaskTypes>({defaultValues: {
+    const { register, formState: {errors}, setValue, watch, handleSubmit, clearErrors, reset } = useForm<TaskTypes>({defaultValues: {
         taskTitle: '',
         taskTimeStart: '',
         taskTimeEnd: '',
         taskDescription: '',
         isImportant: false
     }})
+    const { handleDataEdit, dataEdit } = useModalEditStore()
 
     const clearForm = () => {
         clearErrors()
         reset()
     }
+    const handleAdd = (values: TaskTypes) => {
+        return addTask(user.userId as string, todoId, values)
+    }
+    const handleEdit = (values: TaskTypes) => {
+        return editTask(dataEdit._id as string, values)
+    }
+
     const onSubmit = async (values: TaskTypes) => {
         setIsLoading(true)
         try {
-            const response = await addTask(user.userId as string, todoId, values, isTodoPage)
-            if(response) {
-                toast.success('Success add new task')
+            let promise
+            if(isEdit) {
+                promise = await handleEdit(values)
+            } else {
+                promise = await handleAdd(values)
+            }
+            if(promise) {
+                toast.success(isEdit ? 'Success edit task' : 'Success add new task')
                 clearForm()
+                if(isEdit) {
+                    handleDataEdit(null)
+                }
                 handleClose()
             }
         } catch (error: any) {
@@ -45,6 +61,16 @@ const ModalTaskForm = ({isTodoPage, todoId, handleClose}: PropsTypes) => {
             setIsLoading(false)
         }
     }
+
+    useEffect(() => {
+        if(isEdit) {
+            setValue('taskTitle', dataEdit.title)
+            setValue('taskTimeStart', dataEdit.timeStart)
+            setValue('taskTimeEnd', dataEdit.timeEnd)
+            setValue('taskDescription', dataEdit.description)
+            setValue('isImportant' , dataEdit.isImportant)
+        }
+    }, [isEdit])
 
     return (
         <ModalWrapper>
@@ -72,7 +98,14 @@ const ModalTaskForm = ({isTodoPage, todoId, handleClose}: PropsTypes) => {
                     <div className='mb-3 flexx space-x-3'>
                         <label htmlFor="" className='text-gray-700 dark:text-gray-300'>Time start: </label>
                         <input type='time' disabled={isLoading} 
-                            {...register('taskTimeStart')}
+                            {...register('taskTimeStart', {
+                                validate: (value) => {
+                                    const timeEnd = watch('taskTimeEnd') as string
+                                    const valueFormat = value as string
+                                    if(!timeEnd) return
+                                    return +timeEnd?.split(':').join('') >= +valueFormat?.split(':').join('') || "Time start is higher than time end" 
+                                }
+                            })}
                             min="01:00"
                             max="24:00"
                             className={`flex-1 input-border-bottom text-base ${errors.taskTimeStart?.message ? 'input-border-bottom-error' : ''}`}/>
@@ -80,7 +113,8 @@ const ModalTaskForm = ({isTodoPage, todoId, handleClose}: PropsTypes) => {
                     <div className='mb-3 flexx space-x-3'>
                         <label htmlFor="" className='text-gray-700 dark:text-gray-300'>Time end: </label>
                         <input type='time' disabled={isLoading} 
-                            {...register('taskTimeEnd')}
+                            {...register('taskTimeEnd', {
+                            })}
                             min="01:00"
                             max="24:00"
                             className={`flex-1 input-border-bottom text-base ${errors.taskTimeEnd?.message ? 'input-border-bottom-error' : ''}`}/>
@@ -91,8 +125,8 @@ const ModalTaskForm = ({isTodoPage, todoId, handleClose}: PropsTypes) => {
                             className={`input-border-bottom text-base ${errors.taskDescription?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
                     <div className="flexx space-x-3 mb-5">
-                        <input type='checkbox' id='isImportant' disabled={isLoading}
-                            {...register('isImportant')} className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'/>
+                        <input type='checkbox' {...register('isImportant')} id='isImportant' disabled={isLoading}
+                             className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'/>
                         <label htmlFor='isImportant' className='text-gray-700 dark:text-gray-300'>Is important task?</label>
                     </div>
                     <div className="flexx space-x-3">

@@ -16,7 +16,6 @@ import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 type PropsTypes = {
     todo: TodoDataTypes
 }
-
 const Todo = ({todo}: PropsTypes) => {
     const router = useRouter()
     const { data } = useSession()

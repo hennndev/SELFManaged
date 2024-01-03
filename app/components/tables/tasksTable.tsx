@@ -1,17 +1,81 @@
 'use client'
-import React, { useState, useEffect, Fragment } from 'react'
-import { useRouter } from 'next/router'
+import React, { useState, useEffect, Fragment, ChangeEvent } from 'react'
+import toast from 'react-hot-toast'
+import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { FaExclamation } from 'react-icons/fa'
+import { MdModeEdit, MdDelete } from "react-icons/md"
+import { useModalEditStore } from '@/app/store/zustand'
 import { AnimatePresence, motion } from 'framer-motion'
 import Task from '@/app/components/dashboard/todolist/task'
-import { MdModeEdit, MdDelete, MdStar } from "react-icons/md"
+import ModalTaskForm from '@/app/components/modals/modalTaskForm'
+import { toggleAllTask, deleteTask, checkAllTaskIsDone } from '@/app/lib/actions/taskActions'
+import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 
 type PropsTypes = {
     tasks: TaskDataTypes[]
 }
 const TasksTable = ({tasks}: PropsTypes) => {
+    const params = useParams()
+    const { data } = useSession()
+    const user = data?.user as UserLoginTypes
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isModalEditTask, setIsModalEditTask] = useState<null | string>(null)
+    const [isModalDeleteTask, setIsModalDeleteTask] = useState<null | string>(null)
+    const { handleDataEdit } = useModalEditStore()
+
+    const handleOpenModalEditTask = (task: TaskDataTypes) => {
+        if(task.is_done) {
+            toast.error('This task has been done, you can uncheck to edit this task')
+        } else {
+            setIsModalEditTask(task._id)
+            handleDataEdit({
+                _id: task._id,
+                title: task.title,
+                timeStart: task.time.time_start,
+                timeEnd: task.time.time_end,
+                description: task.description,
+                isImportant: task.is_important
+            })
+        }
+    }
+    const handleDeleteTask = async () => {
+        setIsLoading(true)
+        try {
+            const response = await deleteTask(isModalDeleteTask as string, user.userId as string, params.todoId as string)
+            if(response) {
+                console.log(response)
+                toast.success('Success delete todo')
+                setIsModalDeleteTask(null)
+            }
+        } catch (error: any) {
+            toast.error(error.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+    const handleCheckedAllTask = async (e: ChangeEvent<HTMLInputElement>) => {
+        await toggleAllTask(params.todoId as string, e.target.checked as boolean)
+    }
+    const allTasksDone = tasks.length > 0 ? tasks.every(task => task.is_done) : false
+    
     return (
         <Fragment>
+            {isModalEditTask ? (
+                <ModalTaskForm 
+                    isEdit
+                    todoId={params.todoId as string}
+                    handleClose={() => setIsModalEditTask(null)}/>
+            ) : null}
+            {isModalDeleteTask ? (
+                <ModalConfirmation
+                    title='Are you sure want to delete this task?'
+                    handleCancel={() => setIsModalDeleteTask(null)}
+                    handleClick={handleDeleteTask}
+                    isLoading={isLoading}
+                    variant='danger'
+                    btnTitle='Delete now'/>
+            ) : null}
             <AnimatePresence>
                 <motion.table 
                     initial={{opacity: 0, y: -100}}
@@ -21,10 +85,7 @@ const TasksTable = ({tasks}: PropsTypes) => {
                     <thead>
                         <tr className='bg-gray-50 dark:bg-[#222]'>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>
-                                <div className="flex items-center">
-                                    <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
-                                    <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
-                                </div>
+                                <input type="checkbox" checked={allTasksDone} className={`w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`} onChange={handleCheckedAllTask}/>
                             </th>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>No</th>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 max-w-[300px]'>Task</th>
@@ -47,10 +108,10 @@ const TasksTable = ({tasks}: PropsTypes) => {
                                 <td className='px-3 py-3'>{task.time.time_end || 'none'}</td>
                                 <td className='px-3 py-3 max-w-[400px]'>{task.description || 'none'}</td>
                                 <td className='px-3 py-3 flexx'>
-                                    <div className="icon-button">
+                                    <div className="icon-button" onClick={() => handleOpenModalEditTask(task)}>
                                         <MdModeEdit className='text-xl text-blue-700 dark:text-blue-500 cursor-pointer'/>
                                     </div>
-                                    <div className="icon-button">
+                                    <div className="icon-button" onClick={() => setIsModalDeleteTask(task._id)}>
                                         <MdDelete className='text-xl text-red-700 dark:text-red-500 cursor-pointer'/>
                                     </div>
                                 </td>

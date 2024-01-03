@@ -5,7 +5,7 @@ import { Todo } from "@/app/lib/models/todo.model"
 import { connectDB } from "@/app/lib/utils/mongoose"
 
 
-export const addTask = async (userId: string, todoId: string, newTask: TaskTypes, isTodoPage?: boolean) => {
+export const addTask = async (userId: string, todoId: string, newTask: TaskTypes) => {
     await connectDB()
     try {
         const response = await Task.create({
@@ -22,11 +22,8 @@ export const addTask = async (userId: string, todoId: string, newTask: TaskTypes
             await Todo.updateOne({user: userId, todos: {$elemMatch: {_id: todoId}}}, {
                 $push: {'todos.$.tasks': response._id}
             })
-            if(isTodoPage) {
-                revalidatePath(`/dashboard/todo-list/todo/${todoId}`, 'page')
-            } else {
-                revalidatePath('/dashboard/todo-list')
-            }
+            revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
+            revalidatePath('/dashboard/todo-list')
             return true
         }
     } catch (error: any) {
@@ -35,7 +32,6 @@ export const addTask = async (userId: string, todoId: string, newTask: TaskTypes
         }        
     }
 }
-
 export const editTask = async (taskId: string, updatedTask: TaskTypes) => {
     await connectDB()
     try {
@@ -51,7 +47,7 @@ export const editTask = async (taskId: string, updatedTask: TaskTypes) => {
             }
         })
         if(response) {
-            revalidatePath('/dashboard/todo-list/todo/[todoId]')
+            revalidatePath('/dashboard/todo-list/todo/[todoId]', 'page')
             revalidatePath('/dashboard/todo-list')
             return true
         }
@@ -61,38 +57,67 @@ export const editTask = async (taskId: string, updatedTask: TaskTypes) => {
         }
     }
 }
-
 export const deleteTask = async (taskId: string, userId: string, todoId: string) => {
     await connectDB()
     try {
-        const response = await Task.deleteOne({_id: taskId})     
-        if(response) {
-            await Todo.updateOne({user: userId, todo: {$elemMatch: {_id: todoId}}}, {
-                $pull: {'todos.$.tasks': taskId}
-            })
-            revalidatePath('/dashboard/todo-list/todo/[todoId]')
-            revalidatePath('/dashboard/todo-list')
-            return true
-        }   
+        await Task.deleteOne({_id: taskId})
+        await Todo.updateOne({user: userId, todos: {$elemMatch: {_id: todoId}}}, {
+            $pull: {'todos.$.tasks': taskId}
+        })
+        revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
+        revalidatePath('/dashboard/todo-list')
+        return true
     } catch (error: any) {
         return {
             error: error.message
         }
     }
 }
-
 export const toggleTask = async (taskId: string, value: boolean) => {
     await connectDB()
     try {
         await Task.updateOne({_id: taskId}, {
             $set: { is_done: value }
         })
+        revalidatePath('/dashboard/todo-list/todo/[todoId]', 'page')
         revalidatePath('/dashboard/todo-list')
-        revalidatePath('/dashboard/todo-list/todo/[todoId]')
         return true
     } catch (error: any) {
         return {
             error: error.message
         }        
+    }
+}
+export const checkAllTaskIsDone = async (todoId: string) => {
+    await connectDB()
+    try {
+        const allDone = await Task.find({todoId: todoId, is_done: false})
+        const allDoneLength = allDone.length
+        if(allDoneLength > 0) {
+            throw new Error('Still exist some tasks is undone')
+        } else {
+            return true
+        }
+    } catch (error: any) {
+        return {
+            error: error.message
+        }
+    }
+}
+export const toggleAllTask = async (todoId: string, value: boolean) => {
+    await connectDB()
+    try {
+        await Task.updateMany({todoId: todoId}, {
+            $set: {
+                is_done: value
+            }
+        })
+        revalidatePath('/dashboard/todo-list/todo/[todoId]', 'page')
+        revalidatePath('/dashboard/todo-list')
+        return true
+    } catch (error: any) {
+        return {
+            error: error.message
+        }
     }
 }

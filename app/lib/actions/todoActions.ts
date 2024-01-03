@@ -113,11 +113,8 @@ export const editTodo = async (userId: string, todoId: string, newTodo: TodoType
             }
         })
         if(response) {
-            if(isTodoPage) {
-                revalidatePath(`/dashboard/todo-list/todo/${todoId}`, 'page')
-            } else {
-                revalidatePath('/dashboard/todo-list')
-            }
+            revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
+            revalidatePath('/dashboard/todo-list')
             return true
         }
     } catch (error: any) {

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import TasksTable from '../../tables/tasksTable'
+import TasksTable from '@/app/components/tables/tasksTable'
 
 type PropsTypes = {
     todoData: TodoDataTypes

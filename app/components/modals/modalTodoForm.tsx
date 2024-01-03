@@ -11,12 +11,11 @@ import ModalWrapper from '@/app/components/wrapper/modalWrapper'
 import { addTodo, editTodo } from '@/app/lib/actions/todoActions'
 
 type PropsTypes = {
-    isTodoPage?: boolean
     isEdit?: boolean //just for edit todo action
     handleClose: () => void //close todo modal
 }
 
-const ModalTodoForm = ({isTodoPage, isEdit, handleClose}: PropsTypes) => {
+const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
 
     const { data } = useSession()
     const user = data?.user as UserLoginTypes
@@ -45,7 +44,7 @@ const ModalTodoForm = ({isTodoPage, isEdit, handleClose}: PropsTypes) => {
         return editTodo(user.userId as string, dataEdit._id, {
             ...values,
             todoDate: moment(values.todoDate).format('YYYY-MM-DD')
-        }, isTodoPage)
+        })
     }
 
     const onSubmit = async (values: TodoTypes) => {

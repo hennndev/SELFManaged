@@ -6,15 +6,14 @@ import { GoChevronDown } from "react-icons/go"
 import Button from '@/app/components/ui/button'
 import { IoIosReturnLeft } from 'react-icons/io'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useModalEditStore } from '@/app/store/zustand'
 import BreadCrumb from '@/app/components/utils/breadCrumb'
 import ModalTaskForm from '@/app/components/modals/modalTaskForm'
 import ModalTodoForm from '@/app/components/modals/modalTodoForm'
-import { useModalEditStore } from '@/app/store/zustand'
 
 type PropsTypes = {
     todo: TodoDataTypes
 }
-
 const TodoHeader = ({todo}: PropsTypes) => {
     const [isModalAddTask, setIsModalAddTask] = useState<null | string>(null)
     const [isModalEditTodo, setIsModalEditTodo] = useState<boolean>(false)
@@ -29,19 +28,16 @@ const TodoHeader = ({todo}: PropsTypes) => {
             todoTopics: todo.topics,
         })
     }
-   
     return (
         <Fragment>
             {isModalAddTask ? (
                 <ModalTaskForm 
-                    isTodoPage
                     todoId={isModalAddTask as string}
                     handleClose={() => setIsModalAddTask(null)}/>
             ) : null}
             {isModalEditTodo ? (
-               <ModalTodoForm isEdit isTodoPage handleClose={() => setIsModalEditTodo(false)}/>
-            ) : null}
-            
+               <ModalTodoForm isEdit handleClose={() => setIsModalEditTodo(false)}/>
+            ) : null}     
             <AnimatePresence>
                 <motion.div 
                     initial={{opacity: 0, y: -100}}
@@ -58,7 +54,7 @@ const TodoHeader = ({todo}: PropsTypes) => {
                                 <GoChevronDown className='text-lg mr-2 text-gray-700 dark:text-gray-300'/>
                                 Sort by
                             </Button>
-                            <Button type='button' classes='!mr-5' handleClick={handleOpenModalEditTodo}>
+                            <Button type='button' handleClick={handleOpenModalEditTodo}>
                                 Edit todo
                             </Button>
                             <Button type='button' classes='!mr-5' handleClick={() => setIsModalAddTask(todo._id)}>
@@ -76,5 +72,4 @@ const TodoHeader = ({todo}: PropsTypes) => {
         </Fragment>
     )
 }
-
 export default TodoHeader

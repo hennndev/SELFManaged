@@ -20,7 +20,7 @@ const Task = ({isTable, task}: PropsTypes) => {
         if(task) {
             setChecked(task.is_done)
         }
-    }, [])
+    }, [task])
     return (
         <div className="flex-between">
             <div className="flexx space-x-2">
