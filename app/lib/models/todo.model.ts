@@ -10,34 +10,30 @@ const todoSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Users'
     },
-    todos: [
+    title: {
+        type: String,
+        required: true
+    },
+    // optional
+    description: {
+        type: String,
+        default: null
+    },
+    date: {
+        type: String,
+        required: true
+    },
+    // optional
+    topics: [
         {
-            title: {
-                type: String,
-                required: true
-            },
-            // optional
-            description: {
-                type: String,
-                default: null
-            },
-            date: {
-                type: String,
-                required: true
-            },
-            // optional
-            topics: [
-                {
-                    type: String
-                }
-            ],
-            // default []
-            tasks: [
-                {
-                    type: Schema.Types.ObjectId,
-                    ref: 'Task',
-                }
-            ]
+            type: String
+        }
+    ],
+    // default []
+    tasks: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Task',
         }
     ]
 }, {

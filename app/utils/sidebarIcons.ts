@@ -17,7 +17,7 @@ export const sidebarIcons = [
     {
         Icon: AiOutlineLineChart,
         title: 'Expense Manager',
-        route: 'dashboard/expense-manager'
+        route: 'dashboard/expense-managers'
     },
     {
         Icon: LuListTodo,

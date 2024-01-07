@@ -31,7 +31,6 @@ const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
     const clearForm = () => {
         clearErrors()
         reset()
-        handleClose()
     }
 
     const handleAdd = (values: TodoTypes) => {
@@ -41,7 +40,7 @@ const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
         })
     }
     const handleEdit = (values: TodoTypes) => {
-        return editTodo(user.userId as string, dataEdit._id, {
+        return editTodo(dataEdit._id, {
             ...values,
             todoDate: moment(values.todoDate).format('YYYY-MM-DD')
         })
@@ -58,8 +57,8 @@ const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
             }
             if(promise) {
                 clearForm()
-                handleClose()
                 toast.success(`${isEdit ? 'Success edit todo' : 'Success add new todo'}`)
+                handleClose()
             }
         } catch (error: any) {
             toast.error(error.message)

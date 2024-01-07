@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
@@ -26,13 +26,12 @@ const ModalTaskForm = ({todoId, isEdit, handleClose}: PropsTypes) => {
         isImportant: false
     }})
     const { handleDataEdit, dataEdit } = useModalEditStore()
-
     const clearForm = () => {
         clearErrors()
         reset()
     }
     const handleAdd = (values: TaskTypes) => {
-        return addTask(user.userId as string, todoId, values)
+        return addTask(todoId, values)
     }
     const handleEdit = (values: TaskTypes) => {
         return editTask(dataEdit._id as string, values)

@@ -2,6 +2,7 @@
 import {v2 as cloudinary} from 'cloudinary'
 import {Users} from '@/app/lib/models/user.model'
 import { connectDB } from '@/app/lib/utils/mongoose'
+import { UserData } from '@/app/lib/models/user-data.model'
 
 cloudinary.config({ 
   cloud_name: process.env.CLOUDINARY_NAME, 
@@ -33,19 +34,26 @@ export const changeUserImage = async(email: string, imageFile?: any, isChange?: 
                 }
             })
         }
-    } catch (error) {
-        console.log(error)
+    } catch (error: any) {
+        return {
+            error: error.message
+        }
     }
 }
 
 
-export const changeUserSubscribed = async (email: string, plan: 'free' | 'premium') => {
+export const changeUserSubscribed = async (userId: string, email: string, plan: 'free' | 'premium') => {
     await connectDB()
     try {
         await Users.updateOne({email: email}, {
             is_subscribed: plan
         })
-    } catch (error) {
-        console.log(error)
+        await UserData.create({
+            user_id: userId
+        })
+    } catch (error: any) {
+        return {
+            error: error.message
+        }
     }
 }

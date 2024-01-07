@@ -1,15 +1,14 @@
 'use client'
-import React, { useState, useEffect, Fragment, ChangeEvent } from 'react'
+import React, { useState, Fragment, ChangeEvent } from 'react'
 import toast from 'react-hot-toast'
 import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { FaExclamation } from 'react-icons/fa'
 import { MdModeEdit, MdDelete } from "react-icons/md"
 import { useModalEditStore } from '@/app/store/zustand'
 import { AnimatePresence, motion } from 'framer-motion'
 import Task from '@/app/components/dashboard/todolist/task'
 import ModalTaskForm from '@/app/components/modals/modalTaskForm'
-import { toggleAllTask, deleteTask, checkAllTaskIsDone } from '@/app/lib/actions/taskActions'
+import { toggleAllTask, deleteTask, } from '@/app/lib/actions/taskActions'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 
 type PropsTypes = {
@@ -17,8 +16,6 @@ type PropsTypes = {
 }
 const TasksTable = ({tasks}: PropsTypes) => {
     const params = useParams()
-    const { data } = useSession()
-    const user = data?.user as UserLoginTypes
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isModalEditTask, setIsModalEditTask] = useState<null | string>(null)
     const [isModalDeleteTask, setIsModalDeleteTask] = useState<null | string>(null)
@@ -42,9 +39,8 @@ const TasksTable = ({tasks}: PropsTypes) => {
     const handleDeleteTask = async () => {
         setIsLoading(true)
         try {
-            const response = await deleteTask(isModalDeleteTask as string, user.userId as string, params.todoId as string)
+            const response = await deleteTask(isModalDeleteTask as string, params.todoId as string)
             if(response) {
-                console.log(response)
                 toast.success('Success delete todo')
                 setIsModalDeleteTask(null)
             }
@@ -85,7 +81,9 @@ const TasksTable = ({tasks}: PropsTypes) => {
                     <thead>
                         <tr className='bg-gray-50 dark:bg-[#222]'>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>
-                                <input type="checkbox" checked={allTasksDone} className={`w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`} onChange={handleCheckedAllTask}/>
+                                {tasks.length > 0 ? (
+                                    <input type="checkbox" checked={allTasksDone} className={`w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`} onChange={handleCheckedAllTask}/>
+                                ) : '-'}
                             </th>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 rounded-tl-md'>No</th>
                             <th scope='col' className='text-start text-sm p-3 font-semibold text-gray-700 dark:text-gray-300 max-w-[300px]'>Task</th>
@@ -97,7 +95,7 @@ const TasksTable = ({tasks}: PropsTypes) => {
                     </thead>
                     <tbody>
                         {tasks.length > 0 ? tasks?.map((task: TaskDataTypes, index: number) => (
-                            <tr className={`text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] ${task.is_important && !task.is_done ? 'bg-red-100 hover:bg-red-200 dark:bg-red-200 dark:hover:bg-red-200 dark:text-gray-700' : ''} ${task.is_done ? 'bg-green-100 hover:bg-green-200 dark:bg-green-200 dark:hover:bg-green-300 dark:text-gray-700' : ''}`} key={task._id}>
+                            <tr className={`text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] ${task.is_done ? 'bg-green-100 hover:bg-green-100 dark:bg-green-800 dark:hover:bg-green-800' : ''}`} key={task._id}>
                                 <td className='px-3 py-3 text-sm font-normal flexx space-x-2'>
                                     <Task isTable task={task}/>
                                     {task.is_important ? <FaExclamation className='ml-1 text-red-600 text-md'/> : null}

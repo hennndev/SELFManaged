@@ -4,38 +4,35 @@ import { Task } from "@/app/lib/models/task.model"
 import { Todo } from "@/app/lib/models/todo.model"
 import { connectDB } from "@/app/lib/utils/mongoose"
 
-
-export const addTask = async (userId: string, todoId: string, newTask: TaskTypes) => {
+export const addTask = async (todoId: string, task: TaskTypes) => {
     await connectDB()
     try {
-        const response = await Task.create({
+        const newTask = await Task.create({
             todoId: todoId,
-            title: newTask.taskTitle,
-            description: newTask.taskDescription,
+            title: task.taskTitle,
+            description: task.taskDescription,
             time: {
-                time_start: newTask.taskTimeStart,
-                time_end: newTask.taskTimeEnd
+                time_start: task.taskTimeStart,
+                time_end: task.taskTimeEnd
             },
-            is_important: newTask.isImportant
+            is_important: task.isImportant
         })
-        if(response) {
-            await Todo.updateOne({user: userId, todos: {$elemMatch: {_id: todoId}}}, {
-                $push: {'todos.$.tasks': response._id}
-            })
-            revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
-            revalidatePath('/dashboard/todo-list')
-            return true
-        }
+        await Todo.updateOne({_id: todoId}, {
+            $push: {tasks: newTask._id}
+        })
+        revalidatePath('/dashboard/todo-list')
+        revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
+        return true
     } catch (error: any) {
         return {
             error: error.message
-        }        
+        }
     }
 }
 export const editTask = async (taskId: string, updatedTask: TaskTypes) => {
     await connectDB()
     try {
-        const response = await Task.updateOne({_id: taskId}, {
+        await Task.updateOne({_id: taskId}, {
             $set: {
                 title: updatedTask.taskTitle,
                 description: updatedTask.taskDescription,
@@ -46,23 +43,21 @@ export const editTask = async (taskId: string, updatedTask: TaskTypes) => {
                 is_important: updatedTask.isImportant
             }
         })
-        if(response) {
-            revalidatePath('/dashboard/todo-list/todo/[todoId]', 'page')
-            revalidatePath('/dashboard/todo-list')
-            return true
-        }
+        revalidatePath('/dashboard/todo-list/todo/[todoId]', 'page')
+        revalidatePath('/dashboard/todo-list')
+        return true
     } catch (error: any) {
         return {
             error: error.message
         }
     }
 }
-export const deleteTask = async (taskId: string, userId: string, todoId: string) => {
+export const deleteTask = async (taskId: string, todoId: string) => {
     await connectDB()
     try {
         await Task.deleteOne({_id: taskId})
-        await Todo.updateOne({user: userId, todos: {$elemMatch: {_id: todoId}}}, {
-            $pull: {'todos.$.tasks': taskId}
+        await Todo.updateOne({_id: todoId}, {
+            $pull: {tasks: taskId}
         })
         revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
         revalidatePath('/dashboard/todo-list')
@@ -85,23 +80,7 @@ export const toggleTask = async (taskId: string, value: boolean) => {
     } catch (error: any) {
         return {
             error: error.message
-        }        
-    }
-}
-export const checkAllTaskIsDone = async (todoId: string) => {
-    await connectDB()
-    try {
-        const allDone = await Task.find({todoId: todoId, is_done: false})
-        const allDoneLength = allDone.length
-        if(allDoneLength > 0) {
-            throw new Error('Still exist some tasks is undone')
-        } else {
-            return true
-        }
-    } catch (error: any) {
-        return {
-            error: error.message
-        }
+        } 
     }
 }
 export const toggleAllTask = async (todoId: string, value: boolean) => {

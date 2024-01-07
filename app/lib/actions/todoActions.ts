@@ -3,32 +3,38 @@ import { revalidatePath } from "next/cache"
 import { Todo } from "@/app/lib/models/todo.model"
 import { Task } from "@/app/lib/models/task.model"
 import { connectDB } from "@/app/lib/utils/mongoose"
+import { UserData } from "@/app/lib/models/user-data.model"
 
 export const getTodos = async (userId: string) => {
     await connectDB()
     try {
-        const data: any = await Todo.findOne({user: userId}).select('-createdAt -__v -updatedAt').lean().populate({
-            path: 'todos.tasks',
-            model: Task,
-            select: '-updatedAt -createdAt -__v'
+        const data: any = await UserData.findOne({user_id: userId}).select('_id user_id todos').lean().populate({
+            path: 'todos',
+            model: Todo,
+            select: '-updatedAt -createdAt -__v',
+            populate: {
+                path: 'tasks',
+                model: Task,
+                select: '-updatedAt -createdAt -__v -user'
+            }
         })
-        if(data) {
+        if(data?.todos.length > 0) {
             return {
                 todos: data?.todos.map((todo: TodoDataTypes) => {
                     return {
                         ...todo,
-                        tasks: todo.tasks.map(task => {
+                        _id: todo._id.toString(),
+                        tasks: todo.tasks.map((task: TaskDataTypes) => {
                             return {
                                 ...task,
                                 _id: task._id.toString()
                             }
-                        }),
-                        _id: todo._id.toString()
+                        })
                     }
                 }) as TodoDataTypes[]
-            } 
+            }
         } else {
-            throw new Error('Todos has not yet created')
+            throw new Error('Todos list has not yet created')
         }
     } catch (error: any) {
         return {
@@ -36,30 +42,29 @@ export const getTodos = async (userId: string) => {
         }
     }
 }
-
-export const getTodo = async (userId: string, todoId: string) => {
+export const getTodo = async (todoId: string) => {
     await connectDB()
     try {
-        const data: any = await Todo.findOne({user: userId}).select('-updatedAt -createdAt -__v').lean().populate({
-            path: 'todos.tasks',
+        const data: any = await Todo.findOne({_id: todoId}).select('-updatedAt -createdAt -__v').lean().populate({
+            path: 'tasks',
             model: Task,
             select: '-updatedAt -createdAt -__v'
         })
-        const todoData = data.todos.find((todo: TodoDataTypes) => todo._id.toString() === todoId)
         const transformedData = {
-            ...todoData,
-            _id: todoData._id.toString(),
-            tasks: todoData.tasks.map((task: TaskDataTypes) => {
+            ...data,
+            _id: data._id.toString(),
+            tasks: data.tasks.map((task: TaskDataTypes) => {
                 return {
                     ...task,
                     _id: task._id.toString()
                 }
             })
         }
-        if(data) {
-            return {
-                todo: transformedData as TodoDataTypes
-            }
+        if(!data) {
+            throw new Error('Todo not exist')
+        } 
+        return {
+            todo: transformedData
         }
     } catch (error: any) {
         return {
@@ -67,32 +72,41 @@ export const getTodo = async (userId: string, todoId: string) => {
         }
     }
 }
-
 export const addTodo = async (userId: string, todo: TodoTypes) => {
     await connectDB()
-    const checkTodoUserExist = await Todo.findOne({user: userId})
     try {
-        if(checkTodoUserExist) {
-            await Todo.updateOne({user: userId}, {
-                $push: {todos: {
-                    title: todo.todoTitle,
-                    description: todo.todoDescription,
-                    date: todo.todoDate,
-                    topics: todo.todoTopics
-                }}
-            })
-        } else {
-            await Todo.create({
-                user: userId,
-                todos: [{
-                    title: todo.todoTitle,
-                    description: todo.todoDescription,
-                    date: todo.todoDate,
-                    topics: todo.todoTopics
-                }]
-            })
-        }
+        const newTodo = await Todo.create({
+            user: userId,
+            title: todo.todoTitle,
+            description: todo.todoDescription,
+            date: todo.todoDate,
+            topics: todo.todoTopics
+
+        })
+        await UserData.updateOne({user_id: userId}, {
+            $push: {todos: newTodo._id}
+        })
         revalidatePath('/dashboard/todo-list')
+        return true
+    } catch (error: any) {
+        return {
+            error: error.message
+        }        
+    }
+}
+export const editTodo = async (todoId: string, updatedTodo: TodoTypes) => {
+    await connectDB()
+    try {
+        await Todo.updateOne({_id: todoId}, {
+            $set: {
+                title: updatedTodo.todoTitle,
+                description: updatedTodo.todoDescription,
+                date: updatedTodo.todoDate,
+                topics: updatedTodo.todoTopics
+            }
+        })
+        revalidatePath('/dashboard/todo-list')
+        revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
         return true
     } catch (error: any) {
         return {
@@ -100,38 +114,16 @@ export const addTodo = async (userId: string, todo: TodoTypes) => {
         }
     }
 }
-
-export const editTodo = async (userId: string, todoId: string, newTodo: TodoTypes, isTodoPage?: boolean) => {
-    await connectDB()
-    try {
-        const response = await Todo.updateOne({user: userId, todos: {$elemMatch: {_id: todoId}}}, {
-            $set: {
-                'todos.$.title': newTodo.todoTitle,
-                'todos.$.description': newTodo.todoDescription,
-                'todos.$.date': newTodo.todoDate,
-                'todos.$.topics': newTodo.todoTopics
-            }
-        })
-        if(response) {
-            revalidatePath(`/dashboard/todo-list/todo/[todoId]`, 'page')
-            revalidatePath('/dashboard/todo-list')
-            return true
-        }
-    } catch (error: any) {
-        return {
-            error: error.message
-        }
-    }
-}
-
 export const deleteTodo = async (userId: string, todoId: string) => {
     await connectDB()
     try {
-        await Todo.updateOne({user: userId}, {
-            $pull: {todos: { _id: todoId }}
+        await Todo.deleteOne({_id: todoId})
+        await UserData.updateOne({user_id: userId}, {
+            $pull: {todos: todoId}
         })
         await Task.deleteMany({todoId: todoId})
         revalidatePath('/dashboard/todo-list')
+        revalidatePath('/dashboard/todo-list/todo/[todoId]', 'page')
         return true
     } catch (error: any) {
         return {

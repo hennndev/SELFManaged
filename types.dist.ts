@@ -74,3 +74,44 @@ type TaskDataTypes = {
     is_important: boolean
     is_done: boolean
 }
+
+
+
+
+
+
+
+type ExpenseManagerTypes = {
+    expenseManagerTitle: string
+    expenseManagerCurrency: 'USD' | 'IDR'
+    expenseManagerDescription: string
+}
+
+type ExpenseManagerDataTypes = {
+    _id: string
+    title: string 
+    currency: 'USD' | 'IDR'
+    balance: number
+    description: string
+    transactions: Array<TransactionTypes>
+}
+
+// Transaction
+type TransactionTypes = {
+    transactionName: string
+    transactionType: 'income' | 'expense'
+    transactionCategory: string
+    transactionDescription: string
+    transactionAmount: number
+    transactionDate: string
+}
+
+type TransactionDataTypes = {
+    _id: string
+    name: string
+    type: 'income' | 'expense'
+    category: string
+    description: string
+    amount: number
+    date: string
+}

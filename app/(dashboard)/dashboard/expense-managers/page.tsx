@@ -1,34 +1,33 @@
 import React from 'react'
 import { getServerSession } from 'next-auth'
 import Navbar from '@/app/components/dashboard/navbar'
-import { getTodos } from '@/app/lib/actions/todoActions'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import EmptyDataMessage from '@/app/components/utils/emptyDataMessage'
-import TodoListContent from '@/app/components/dashboard/todolist/todoList'
-import TodoListHeader from '@/app/components/dashboard/todolist/todoListHeader'
+import { getExpenseManagers } from '@/app/lib/actions/expenseManagerActions'
+import ExpenseManagerHeader from '@/app/components/dashboard/expense-managers/expenseManagerHeader'
+import ExpenseManagerContent from '@/app/components/dashboard/expense-managers/expense-managers'
+
 
 export const metadata = {
-    title: 'Todo List | SELFManaged'
+    title: 'Expense Managers | SELFManaged'
 }
-const TodoList = async () => {
+const ExpenseManagers = async () => {
     const session = await getServerSession(authOptions)
     const user = session?.user as UserLoginTypes
-    const data = await getTodos(user?.userId as string)
+    const data = await getExpenseManagers(user.userId)
 
-    console.log(data)
-    
     return (
         <section className='flex-1'>
-            <Navbar title="Todo List"/>
+            <Navbar title="Expense Manager"/>
             <section className="mt-5 px-7 pb-10">
-                <TodoListHeader/>
-                {data.todos ? (
-                    <TodoListContent todosData={data?.todos as Array<TodoDataTypes>}/>
+                <ExpenseManagerHeader/>
+                {data.expense_managers ? (
+                    <ExpenseManagerContent expenseManagersData={data.expense_managers}/>
                 ): (
                     <EmptyDataMessage>
                         <div className='flex-center flex-col space-y-3 mt-10'>
                             <p className='text-gray-700 dark:text-gray-300 font-medium text-lg'>{data?.error as string}</p>
-                            <p className='text-gray-500 dark:text-gray-500 text-sm font-medium'>-- Do something great today --</p>
+                            <p className='text-gray-500 dark:text-gray-500 text-sm font-medium'>-- Manage your financial be eficient --</p>
                         </div>
                     </EmptyDataMessage>
                 )}
@@ -36,4 +35,4 @@ const TodoList = async () => {
         </section>
     )
 }
-export default TodoList
+export default ExpenseManagers

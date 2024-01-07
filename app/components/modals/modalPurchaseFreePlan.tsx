@@ -19,7 +19,7 @@ const ModalPurchaseFreePlan = ({handleCloseModal}: PropsTypes) => {
     const handlePurchaseFreePlan = async () => {
         setIsLoading(true)
         try {
-            await changeUserSubscribed(user.email as string, 'free').then(() => {
+            await changeUserSubscribed(user.userId as string, user.email as string, 'free').then(() => {
                 update({isSubscribed: 'free'})
             })
         } catch (error) {

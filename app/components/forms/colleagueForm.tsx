@@ -47,7 +47,7 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
         })
     }
     const handleEdit = (formValues: ColleagueTypes, jobOthers: string) => {
-        return editColleague(user?.userId, params.colleagueId as string, {
+        return editColleague(params.colleagueId as string, {
             ...formValues,
             job: formValues.job === 'Others' ? jobOthers : formValues.job
         })
@@ -66,7 +66,7 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
                 promise = await handleEdit(formValues, jobOthers)
             }
             if(promise) {
-                toast.success('Success add new colleague')
+                toast.success(`${isEdit ? 'Success edit colleague' : 'Success add new colleague'}`)
                 onReset()
                 setTimeout(() => {
                     toast.dismiss()
@@ -82,7 +82,7 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
     useEffect(() => {
         if(params.colleagueId && user?.userId) {
             const handleGetColleague = async () => {
-                const colleague = await getColleague(user?.userId as string, params.colleagueId as string)
+                const colleague = await getColleague(params.colleagueId as string)
                 if(colleague) {
                     setValue('name', colleague.name)
                     setValue('email', colleague.email)
@@ -104,7 +104,7 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
             handleGetColleague()
         }
     }, [params.colleagueId, user?.userId])
-    
+
     return (
         <Fragment>
             <AnimatePresence>
@@ -174,7 +174,7 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
                                     })}
                                     className={`input mt-4 ${errors.jobOthers?.message ? 'input-error' : ''}`}/>
                             )}
-                            {errors.jobOthers ? (
+                            {watch('job') === 'Others' && errors.jobOthers ? (
                                 <small className='input-msg-error'>{errors.jobOthers?.message}</small>
                             ) : null}
                         </div>

@@ -1,13 +1,18 @@
 'use server'
 import { revalidatePath } from "next/cache"
 import { connectDB } from "@/app/lib/utils/mongoose"
+import { UserData } from "../models/user-data.model"
 import { Colleague } from "@/app/lib/models/colleague.model"
 
 export const getColleagues = async (userId: string) => {
     await connectDB()
-    const data: any = await Colleague.findOne({user: userId}).lean().select('-updatedAt -createdAt -__v')
     try {
-        if(data) {
+        const data: any = await UserData.findOne({user_id: userId}).select('_id user_id colleagues').lean().populate({
+            path: 'colleagues',
+            model: Colleague,
+            select: ('-updatedAt -createdAt -__v -user')
+        })
+        if(data?.colleagues.length > 0) {
             return {
                 colleagues: data?.colleagues.map((colleague: ColleaguesDataTypes) => {
                     return {
@@ -17,93 +22,85 @@ export const getColleagues = async (userId: string) => {
                 }) as ColleaguesDataTypes[]
             }
         } else {
-            throw new Error('Colleagues not yet has created!')
+            throw new Error('Colleagues list has not yet created')
         }
     } catch (error: any) {
         return {
             error: error.message as string
-        }   
-    }
-}
-
-export const getColleague = async (userId: string, colleagueId: string) => {
-    await connectDB()
-    try {
-        const data: any = await Colleague.findOne({user: userId}).lean()
-        const colleague = data?.colleagues?.find((coll: ColleaguesDataTypes) => coll._id.toString() === colleagueId)
-        const transformedColleague = {
-            ...colleague,
-            _id: colleague._id.toString()
         }
-        return transformedColleague 
-    } catch (error: any) {
-        return {
-            error: error.message as string
-        }    
     }
 }
-
-export const addNewColleague = async (userId: string, newColleague: ColleagueTypes) => {
-    await connectDB()
-    const checkUserExist = await Colleague.findOne({user: userId})
-    try {
-        if(!checkUserExist) {
-            await Colleague.create({
-                user: userId,
-                colleagues: [{
-                    ...newColleague,
-                    phone_number: newColleague.phoneNumber,
-                    is_favorite: newColleague.isFavorite
-                }]
-            })
-        } else {
-            await Colleague.updateOne({user: userId}, {
-                $push: {colleagues: {
-                    ...newColleague,
-                    phone_number: newColleague.phoneNumber,
-                    is_favorite: newColleague.isFavorite
-                }}
-            })
-        }
-        revalidatePath('/dashboard/colleague')
-        return true
-    } catch (error: any) {
-        throw new Error(error.message)   
-    }
-}
-
-export const editColleague = async (userId: string, colleagueId: string, colleagueUpdated: ColleagueTypes) => {
+export const getColleague = async (colleagueId: string) => {
     await connectDB()
     try {
-        await Colleague.updateOne({user: userId, colleagues: {$elemMatch: {_id: colleagueId}}}, {
-            $set: {
-                "colleagues.$.name": colleagueUpdated.name,
-                "colleagues.$.email": colleagueUpdated.email,
-                "colleagues.$.address": colleagueUpdated.address,
-                "colleagues.$.job": colleagueUpdated.job,
-                "colleagues.$.phone_number": colleagueUpdated.phoneNumber,
-                "colleagues.$.country": colleagueUpdated.country,
-                "colleagues.$.is_favorite": colleagueUpdated.isFavorite,
+        const data: any = await Colleague.findOne({_id: colleagueId}).select('-user -updatedAt -createdAt -__v').lean()
+        if(data) {
+            const transformedColleague = {
+                ...data,
+                _id: data._id.toString()
             }
-        })    
-        revalidatePath('/dashboard/colleague/edit-colleague/[colleagueId]')
-        return true
+            return transformedColleague
+        } 
     } catch (error: any) {
-        throw new Error(error.message)
+        return undefined
     }
 }
-
-
-export const deleteColleague = async (userId: string, colleagueId: string) => {
+export const addNewColleague = async (userId: string, colleague: ColleagueTypes) => {
     await connectDB()
     try {
-        await Colleague.updateOne({user: userId}, {
-            $pull: {colleagues: {_id: colleagueId}}
+        const newData = await Colleague.create({
+            ...colleague,
+            phone_number: colleague.phoneNumber,
+            is_favorite: colleague.isFavorite,
+            user: userId
+        })
+        await UserData.updateOne({user_id: userId}, {
+            $push: {colleagues: newData._id}
         })
         revalidatePath('/dashboard/colleague')
         return true
     } catch (error: any) {
-        throw new Error(error.message)
+        return {
+            error: error.message
+        }
+    }
+}
+export const editColleague = async (colleagueId: string, colleagueUpdated: ColleagueTypes) => {
+    await connectDB()
+    try {
+        await Colleague.updateOne({_id: colleagueId}, {
+            $set: {
+                name: colleagueUpdated.name,
+                email: colleagueUpdated.email,
+                address: colleagueUpdated.address,
+                job: colleagueUpdated.job,
+                phone_number: colleagueUpdated.phoneNumber,
+                country: colleagueUpdated.country,
+                is_favorite: colleagueUpdated.isFavorite,
+            }
+        })
+        revalidatePath('/dashboard/colleague')
+        revalidatePath('/dashboard/colleague/edit-colleague/[colleagueId]', 'page')
+        return true
+    } catch (error: any) {
+        return {
+            error: error.message
+        }
+    }
+}
+export const deleteColleague = async (userId: string, colleagueId: string) => {
+    await connectDB()
+    try {
+        await Colleague.deleteOne({_id: colleagueId})
+        await UserData.updateOne({user_id: userId}, {
+            $pull: {colleagues: colleagueId}
+        })
+        revalidatePath('/dashboard/colleague')
+        return true
+    } catch (error: any) {
+        return {
+            error: error.message
+        }        
     }
 }
 
