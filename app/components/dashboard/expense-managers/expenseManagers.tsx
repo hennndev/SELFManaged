@@ -7,7 +7,7 @@ import { useModalEditStore } from '@/app/store/zustand'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 import { deleteExpenseManager } from '@/app/lib/actions/expenseManagerActions'
 import ModalExpenseManagerForm from '@/app/components/modals/modalExpenseManagerForm'
-import ExpenseManager from '@/app/components/dashboard/expense-managers/expense-manager'
+import ExpenseManager from '@/app/components/dashboard/expense-managers/expenseManager'
 
 type PropsTypes = {
     expenseManagersData: Array<ExpenseManagerDataTypes>

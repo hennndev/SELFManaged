@@ -102,8 +102,9 @@ type TransactionTypes = {
     transactionType: 'income' | 'expense'
     transactionCategory: string
     transactionDescription: string
-    transactionAmount: number
+    transactionAmount: number | string
     transactionDate: string
+    transactionTime: string
 }
 
 type TransactionDataTypes = {

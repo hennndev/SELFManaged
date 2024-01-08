@@ -5,8 +5,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import EmptyDataMessage from '@/app/components/utils/emptyDataMessage'
 import { getExpenseManagers } from '@/app/lib/actions/expenseManagerActions'
 import ExpenseManagerHeader from '@/app/components/dashboard/expense-managers/expenseManagerHeader'
-import ExpenseManagerContent from '@/app/components/dashboard/expense-managers/expense-managers'
-
+import ExpenseManagerContent from '@/app/components/dashboard/expense-managers/expenseManagers'
 
 export const metadata = {
     title: 'Expense Managers | SELFManaged'

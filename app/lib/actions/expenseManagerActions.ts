@@ -32,6 +32,37 @@ export const getExpenseManagers = async (userId: string) => {
         }
     }
 }
+export const getExpenseManager = async (expenseManagerId: string) => {
+    await connectDB()
+    try {
+        const expenseManager: any = await ExpenseManager.findOne({_id: expenseManagerId}).select('-updatedAt -createdAt -__v').lean().populate({
+            path: 'transactions',
+            model: Transaction,
+            select: '-updatedAt -createdAt -__v'
+        })
+        const transformedData = {
+            ...expenseManager,
+            _id: expenseManager._id.toString(),
+            transactions: expenseManager.transactions.map((obj: TransactionDataTypes) => {
+                return {
+                    ...obj,
+                    _id: obj._id.toString()
+                }
+            })
+        } as ExpenseManagerDataTypes
+        if(!expenseManager) {
+            throw new Error('Expense manager not existed')
+        } else {
+            return {
+                expenseManager: transformedData
+            }
+        }
+    } catch (error: any) {
+        return {
+            error: error.message
+        }
+    }
+}
 export const addExpenseManager = async (userId: string, expenseManager: ExpenseManagerTypes) => {
     await connectDB()
     try {
