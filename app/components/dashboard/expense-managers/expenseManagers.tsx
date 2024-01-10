@@ -1,25 +1,24 @@
 'use client'
 import React, { useState, Fragment } from 'react'
 import toast from 'react-hot-toast'
-import { useSession } from 'next-auth/react'
+import useCurrentUser from '@/app/hooks/useCurrentUser'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useModalEditStore } from '@/app/store/zustand'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 import { deleteExpenseManager } from '@/app/lib/actions/expenseManagerActions'
 import ModalExpenseManagerForm from '@/app/components/modals/modalExpenseManagerForm'
-import ExpenseManager from '@/app/components/dashboard/expense-managers/expenseManager'
+import ExpenseManagerItem from '@/app/components/dashboard/expense-managers/expenseManagerItem'
 
 type PropsTypes = {
     expenseManagersData: Array<ExpenseManagerDataTypes>
 }
-
+// ✅ All Clear
 const ExpenseManagers = ({expenseManagersData}: PropsTypes) => {
-    const { data: dataUser } = useSession()
-    const user = dataUser?.user as UserLoginTypes
+    const user = useCurrentUser()
+    const { handleDataEdit } = useModalEditStore()
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isModalEdit, setIsModalEdit] = useState<boolean>(false)
     const [isModalDelete, setIsModalDelete] = useState<null | string>(null)
-    const { handleDataEdit } = useModalEditStore()
 
     const handleDeleteExpenseManager = async () => {
         setIsLoading(true)
@@ -63,11 +62,7 @@ const ExpenseManagers = ({expenseManagersData}: PropsTypes) => {
                     transition={{duration: 0.3, delay: 0.3}}>
                     <div className='grid grid-cols-cards gap-5'>
                         {expenseManagersData.map((obj) => (
-                            <ExpenseManager 
-                                key={obj._id} 
-                                data={obj}
-                                handleOpenModalDelete={() => setIsModalDelete(obj._id)}
-                                handleOpenModalEdit={() => handleOpenModalEditExpenseManager(obj)}/>
+                            <ExpenseManagerItem key={obj._id} data={obj} handleOpenModalDelete={() => setIsModalDelete(obj._id)} handleOpenModalEdit={() => handleOpenModalEditExpenseManager(obj)}/>
                         ))}
                     </div>
                 </motion.div>

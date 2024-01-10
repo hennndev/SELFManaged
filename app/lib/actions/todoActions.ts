@@ -11,7 +11,7 @@ export const getTodos = async (userId: string) => {
         const data: any = await UserData.findOne({user_id: userId}).select('_id user_id todos').lean().populate({
             path: 'todos',
             model: Todo,
-            select: '-updatedAt -createdAt -__v',
+            select: '-updatedAt -user -createdAt -__v',
             populate: {
                 path: 'tasks',
                 model: Task,
@@ -45,7 +45,7 @@ export const getTodos = async (userId: string) => {
 export const getTodo = async (todoId: string) => {
     await connectDB()
     try {
-        const data: any = await Todo.findOne({_id: todoId}).select('-updatedAt -createdAt -__v').lean().populate({
+        const data: any = await Todo.findOne({_id: todoId}).select('-updatedAt -user -createdAt -__v').lean().populate({
             path: 'tasks',
             model: Task,
             select: '-updatedAt -createdAt -__v'

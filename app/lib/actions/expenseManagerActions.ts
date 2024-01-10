@@ -21,7 +21,7 @@ export const getExpenseManagers = async (userId: string) => {
         })
         if(data?.expense_managers.length > 0) {
             return {
-                expense_managers: transformedExpenseManager
+                data: transformedExpenseManager
             }
         } else {
             throw new Error('Expense managers has not yet created')
@@ -35,7 +35,7 @@ export const getExpenseManagers = async (userId: string) => {
 export const getExpenseManager = async (expenseManagerId: string) => {
     await connectDB()
     try {
-        const expenseManager: any = await ExpenseManager.findOne({_id: expenseManagerId}).select('-updatedAt -createdAt -__v').lean().populate({
+        const expenseManager: any = await ExpenseManager.findOne({_id: expenseManagerId}).select('-updatedAt -user -__v').lean().populate({
             path: 'transactions',
             model: Transaction,
             select: '-updatedAt -createdAt -__v'
@@ -54,7 +54,7 @@ export const getExpenseManager = async (expenseManagerId: string) => {
             throw new Error('Expense manager not existed')
         } else {
             return {
-                expenseManager: transformedData
+                data: transformedData
             }
         }
     } catch (error: any) {
@@ -63,16 +63,17 @@ export const getExpenseManager = async (expenseManagerId: string) => {
         }
     }
 }
-export const addExpenseManager = async (userId: string, expenseManager: ExpenseManagerTypes) => {
+export const addExpenseManager = async (userId: string, values: ExpenseManagerTypes) => {
     await connectDB()
     try {
         const newExpenseManager = await ExpenseManager.create({
-            user: userId,
-            title: expenseManager.expenseManagerTitle,
-            currency: expenseManager.expenseManagerCurrency,
-            description: expenseManager.expenseManagerDescription,
-            balance: 0,
+            user: userId, //Just for relation with models User. Still not used, maybe in the next will be used
+            title: values.expenseManagerTitle,
+            currency: values.expenseManagerCurrency,
+            description: values.expenseManagerDescription,
+            balance: 0, //by default every new expense manager created, the balance is 0
         })
+        //When new expense manager is created, then will related to User Data models.
         await UserData.updateOne({user_id: userId}, {
             $push: {expense_managers: newExpenseManager._id}
         })
@@ -84,18 +85,19 @@ export const addExpenseManager = async (userId: string, expenseManager: ExpenseM
         }
     }
 }
-export const editExpenseManager = async (expenseManagerId: string, updatedExpenseManager: ExpenseManagerTypes) => {
+export const editExpenseManager = async (expenseManagerId: string, values: ExpenseManagerTypes) => {
     await connectDB()
     try {
+        // Update old values with new values
         await ExpenseManager.updateOne({_id: expenseManagerId}, {
             $set: {
-                title: updatedExpenseManager.expenseManagerTitle,
-                currency: updatedExpenseManager.expenseManagerCurrency,
-                description: updatedExpenseManager.expenseManagerDescription
+                title: values.expenseManagerTitle,
+                currency: values.expenseManagerCurrency,
+                description: values.expenseManagerDescription
             }
         })
         revalidatePath('/dashboard/expense-managers')
-        // revalidatePath('/dashboard/expense-managers/expense-manager/[expenseManagerId]', 'page')
+        revalidatePath('/dashboard/expense-managers/expense-manager/[expenseManagerId]', 'page')
         return true
     } catch (error: any) {
         return {
@@ -107,11 +109,14 @@ export const deleteExpenseManager = async (userId: string, expenseManagerId: str
     await connectDB()
     try {
         await ExpenseManager.deleteOne({_id: expenseManagerId})
+        // Pull data by expenseManagerId in UserData models
         await UserData.updateOne({user_id: userId}, {
             $pull: {expense_managers: expenseManagerId}
         })
+        // Every 1 expense manager deleted, then all transactions that have relation with this expense manager will deleted also.
+        await Transaction.deleteMany({expense_manager_id: expenseManagerId})
         revalidatePath('/dashboard/expense-managers')
-        // revalidatePath('/dashboard/expense-managers')
+        revalidatePath('/dashboard/expense-managers/expense-manager/[expenseManagerId]', 'page')
         return true
     } catch (error: any) {
         return {

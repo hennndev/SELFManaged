@@ -1,19 +1,23 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import moment from 'moment'
+import toast from 'react-hot-toast'
 import { useForm } from 'react-hook-form'
 import Button from '@/app/components/ui/button'
+import { useModalEditStore } from '@/app/store/zustand'
+import ModalTitle from '@/app/components/utils/modalTitle'
 import ModalWrapper from '@/app/components/wrapper/modalWrapper'
+import { addTransaction, editTransaction } from '@/app/lib/actions/transactionAction'
 
 type PropsTypes = {
+    isEdit?: boolean
     expenseManagerId: string
     handleClose: () => void
 }
-
-const ModalTransactionForm = ({expenseManagerId, handleClose}: PropsTypes) => {
-
+const ModalTransactionForm = ({isEdit, expenseManagerId, handleClose}: PropsTypes) => {
+    const { dataEdit, handleDataEdit } = useModalEditStore()
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const { register, formState: { errors }, handleSubmit } = useForm<TransactionTypes>({defaultValues: {
+    const { register, formState: { errors }, setValue, watch, handleSubmit } = useForm<TransactionTypes>({defaultValues: {
         transactionName: '',
         transactionType: 'income',
         transactionCategory: '',
@@ -23,25 +27,56 @@ const ModalTransactionForm = ({expenseManagerId, handleClose}: PropsTypes) => {
         transactionTime: ''
     }})
 
-    const onSubmit = async (values: TransactionTypes) => {
-        console.log(values)
+    const handleAdd = (values: TransactionTypes) => {
+        return addTransaction(expenseManagerId, values)
     }
+    const handleEdit = (values: TransactionTypes) => {
+        return editTransaction(expenseManagerId, dataEdit._id, values)
+    }
+
+    const onSubmit = async (values: TransactionTypes) => {
+        setIsLoading(true)
+        let promise
+        try {
+            if(isEdit) {
+                promise = await handleEdit(values)
+            } else {
+                promise = await handleAdd(values)
+            }
+            if(promise) {
+                handleDataEdit(null)
+                toast.success(`Success ${isEdit ? 'edit' : 'add'} transaction`)
+                handleClose()
+            }
+        } catch (error: any) {
+            toast.error(error.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if(isEdit) {
+            setValue('transactionName', dataEdit.name)
+            setValue('transactionType', dataEdit.type)
+            setValue('transactionCategory', dataEdit.category)
+            setValue('transactionAmount', dataEdit.amount)
+            setValue('transactionDate', dataEdit.date)
+            setValue('transactionTime', dataEdit.time)
+            setValue('transactionDescription', dataEdit.description)
+        }
+    }, [isEdit])
+    
 
     return (
         <ModalWrapper>
-             <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                    Add new transaction <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field is optional, you can empty that field</span>
-                </h3>
-                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" onClick={handleClose}>
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-            </div>
+            {isLoading ? <div className='overlay-loading'/> : null}
+             <ModalTitle handleClose={handleClose}>
+                Add new transaction <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field and time field is optional, you can empty that field</span>
+             </ModalTitle>
             <div className='p-4'>
                 <form onSubmit={handleSubmit(onSubmit)}>
+                    {/* TRANSACTION NAME */}
                     <div className='mb-3'>
                         <input type='text' placeholder='Transaction Name' disabled={isLoading}
                             {...register('transactionName', {
@@ -49,21 +84,34 @@ const ModalTransactionForm = ({expenseManagerId, handleClose}: PropsTypes) => {
                             })}
                             className={`input-border-bottom text-base ${errors.transactionName?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
+                    {/* TRANSACTION TYPE */}
                     <div className='mb-3'>
-                        <select {...register('transactionType')} disabled={isLoading} className={`input-border-bottom text-base [&>option]:dark:bg-[#181818] ${errors.transactionType?.message ? 'input-border-bottom-error' : ''}`}>
+                        <select {...register('transactionType', {
+                            required: 'Field is required'
+                        })} disabled={isLoading} className={`input-border-bottom text-base [&>option]:dark:bg-[#181818] ${errors.transactionType?.message ? 'input-border-bottom-error' : ''}`}>
                             <option value="" selected>Choose transaction type</option>
                             <option value="income">Income</option>
                             <option value="expense">Expense</option>
                         </select>
                     </div>
+                    {/* TRANSACTION CATEGORY */}
                     <div className='mb-3'>
-                        <select {...register('transactionCategory')} disabled={isLoading} className={`input-border-bottom text-base [&>option]:dark:bg-[#181818] ${errors.transactionCategory?.message ? 'input-border-bottom-error' : ''}`}>
+                        <select {...register('transactionCategory', {
+                            required: 'Field is required'
+                        })} disabled={isLoading} className={`input-border-bottom text-base [&>option]:dark:bg-[#181818] ${errors.transactionCategory?.message ? 'input-border-bottom-error' : ''}`}>
                             <option value="" selected>Choose transaction category</option>
-                            <option value="income">Salary</option>
-                            <option value="expense">Foods</option>
-                            <option value="expense">Shopping</option>
+                            <option value="Salary">Salary</option>
+                            <option value="Foods">Foods</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Education">Education</option>
+                            <option value="Family">Family</option>
+                            <option value="Lifestyle">Lifestyle</option>
+                            <option value="Holiday">Holiday</option>
+                            <option value="Daily activity">Daily Activity</option>
+                            <option value="Others">Others</option>
                         </select>
                     </div>
+                    {/* TRANSACTION Amount */}
                     <div className='mb-3'>
                         <input type='number' placeholder='Transaction Amount' disabled={isLoading}
                             {...register('transactionAmount', {
@@ -71,6 +119,7 @@ const ModalTransactionForm = ({expenseManagerId, handleClose}: PropsTypes) => {
                             })}
                             className={`input-border-bottom text-base ${errors.transactionAmount?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
+                    {/* TRANSACTION DATE */}
                     <div className='mb-3'>
                         <input type='date' disabled={isLoading}
                             {...register('transactionDate', {
@@ -79,13 +128,13 @@ const ModalTransactionForm = ({expenseManagerId, handleClose}: PropsTypes) => {
                             max={moment(new Date()).add(1, 'minutes').format('YYYY-MM-DD')}
                             className={`input-border-bottom text-base ${errors.transactionDate?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
+                    {/* TRANSACTION TIME */}
                     <div className='mb-3'>
                         <input type='time' disabled={isLoading}
-                            {...register('transactionTime', {
-                                required: 'Field is required'
-                            })}
+                            {...register('transactionTime')}
                             className={`input-border-bottom text-base ${errors.transactionTime?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
+                    {/* TRANSACTION DESCRIPTION */}
                     <div className='mb-3'>
                         <textarea rows={3} disabled={isLoading} placeholder='About your transaction description' 
                             {...register('transactionDescription')}

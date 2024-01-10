@@ -6,7 +6,9 @@ import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
 import { todoTopics } from '@/app/utils/utils'
 import Button from '@/app/components/ui/button'
+import useCurrentUser from '@/app/hooks/useCurrentUser'
 import { useModalEditStore } from '@/app/store/zustand'
+import ModalTitle from '@/app/components/utils/modalTitle'
 import ModalWrapper from '@/app/components/wrapper/modalWrapper'
 import { addTodo, editTodo } from '@/app/lib/actions/todoActions'
 
@@ -17,8 +19,7 @@ type PropsTypes = {
 
 const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
 
-    const { data } = useSession()
-    const user = data?.user as UserLoginTypes
+    const user = useCurrentUser()
     const { register, formState: {errors}, setValue, handleSubmit, clearErrors, reset } = useForm<TodoTypes>({defaultValues: {
         todoTitle: '',
         todoDate: '',
@@ -80,17 +81,9 @@ const ModalTodoForm = ({isEdit, handleClose}: PropsTypes) => {
     return (
         <ModalWrapper>
             {isLoading ? <div className='overlay-loading'></div> : null}
-            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                    Add new todo <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field is optional, you can empty that field</span>
-                </h3>
-                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" onClick={handleClose}>
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-            </div>
+            <ModalTitle handleClose={handleClose}>
+                Add new todo <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field is optional, you can empty that field</span>
+            </ModalTitle>
             <div className='p-4'>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className='mb-3'>

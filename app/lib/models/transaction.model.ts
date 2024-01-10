@@ -2,6 +2,10 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 const transactionSchema = new Schema({
+    expense_manager_id: {
+        type: String,
+        required: true 
+    },
     name: {
         type: String,
         required: true
@@ -26,6 +30,10 @@ const transactionSchema = new Schema({
     date: {
         type: String,
         required: true
+    },
+    time: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true

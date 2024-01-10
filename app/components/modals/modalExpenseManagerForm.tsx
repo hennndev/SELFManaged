@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useForm } from 'react-hook-form'
-import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
+import useCurrentUser from '@/app/hooks/useCurrentUser'
 import { useModalEditStore } from '@/app/store/zustand'
+import ModalTitle from '@/app/components/utils/modalTitle'
 import ModalWrapper from '@/app/components/wrapper/modalWrapper'
 import { addExpenseManager, editExpenseManager } from '@/app/lib/actions/expenseManagerActions'
 
@@ -12,10 +13,9 @@ type PropsTypes = {
     isEdit?: boolean
     handleClose: () => void
 }
+// ✅ All Clear
 const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
-
-    const { data } = useSession()
-    const user = data?.user as UserLoginTypes
+    const user = useCurrentUser()
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const { register, formState: { errors },  handleSubmit, setValue, clearErrors, reset  } = useForm<ExpenseManagerTypes>({defaultValues: {
         expenseManagerTitle: '',
@@ -23,9 +23,11 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
         expenseManagerDescription: ''
     }})
     const { dataEdit, handleDataEdit } = useModalEditStore()
+    // This function was for handle add new expense manager data
     const handleAdd = (values: ExpenseManagerTypes) => {
         return addExpenseManager(user.userId, values)
     }
+    // This function was for handle edit expense manager data
     const handleEdit = (values: ExpenseManagerTypes) => {
         return editExpenseManager(dataEdit._id, values)
     }
@@ -42,11 +44,12 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
             } else {
                 promise = await handleAdd(values)
             }
+            // When async function is resolved, then will doing this
             if(promise) {
                 clearForm()
                 toast.success(isEdit ? 'Success edit expense manager' : 'Success add new expense manager')
-                handleDataEdit(null)
-                handleClose()
+                handleDataEdit(null) //data term from zustand will removed
+                handleClose() //close modal
             }
         } catch (error: any) {
             toast.error(error.message)
@@ -54,8 +57,8 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
             setIsLoading(false)
         }
     }
-
     useEffect(() => {
+        // This condition always be called every this modal as an edit modal
         if(isEdit) {
             setValue('expenseManagerTitle', dataEdit.expenseManagerTitle)
             setValue('expenseManagerCurrency', dataEdit.expenseManagerCurrency)
@@ -65,19 +68,13 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
 
     return (
         <ModalWrapper>
-             <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                    {isEdit ? 'Edit ' : 'Add new '} expense manager <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field is optional, you can empty that field</span>
-                </h3>
-                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-[#222] dark:hover:text-white" onClick={handleClose}>
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-            </div>
+            {isLoading ? <div className='overlay-loading'/> : null}
+            <ModalTitle handleClose={handleClose}>
+                {isEdit ? 'Edit ' : 'Add new '} expense manager <br /><span className='text-sm font-normal text-gray-600 dark:text-gray-400'>Description field is optional, you can empty that field</span>
+            </ModalTitle>
             <div className='p-4'>
                 <form onSubmit={handleSubmit(onSubmit)}>
+                    {/* EXPENSE MANAGER TITLE */}
                     <div className='mb-3'>
                         <input type='text' placeholder='Expense Manager Title' disabled={isLoading}
                             {...register('expenseManagerTitle', {
@@ -85,6 +82,7 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
                             })}
                             className={`input-border-bottom text-2xl ${errors.expenseManagerTitle?.message ? 'input-border-bottom-error' : ''}`}/>
                     </div>
+                    {/* EXPENSE MANAGER CURRENCY (IDR/USD) */}
                     <div className='mb-3'>
                         <select disabled={isLoading}
                             {...register('expenseManagerCurrency', {
@@ -96,6 +94,7 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
                                 <option value="USD">USD</option>
                         </select>
                     </div>
+                    {/* EXPENSE MANAGER DESCRIPTION */}
                     <div className='mb-3'>
                         <textarea rows={3} disabled={isLoading} placeholder='About your expense manager description' 
                             {...register('expenseManagerDescription')}
@@ -112,5 +111,4 @@ const ModalExpenseManagerForm = ({isEdit, handleClose}: PropsTypes) => {
         </ModalWrapper>
     )
 }
-
 export default ModalExpenseManagerForm

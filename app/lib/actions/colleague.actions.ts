@@ -14,7 +14,7 @@ export const getColleagues = async (userId: string) => {
         })
         if(data?.colleagues.length > 0) {
             return {
-                colleagues: data?.colleagues.map((colleague: ColleaguesDataTypes) => {
+                data: data?.colleagues.map((colleague: ColleaguesDataTypes) => {
                     return {
                         ...colleague,
                         _id: colleague._id.toString()

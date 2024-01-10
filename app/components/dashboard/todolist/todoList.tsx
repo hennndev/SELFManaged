@@ -1,26 +1,25 @@
 'use client'
 import React, { useState, Fragment } from 'react'
 import toast from 'react-hot-toast'
-import { useSession } from 'next-auth/react'
+import useCurrentUser from '@/app/hooks/useCurrentUser'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useModalEditStore } from '@/app/store/zustand'
 import { deleteTodo } from '@/app/lib/actions/todoActions'
-import Todo from '@/app/components/dashboard/todolist/todoItem'
 import ModalTodoForm from '@/app/components/modals/modalTodoForm'
 import ModalTaskForm from '@/app/components/modals/modalTaskForm'
+import TodoItem from '@/app/components/dashboard/todolist/todoItem'
 import ModalConfirmation from '@/app/components/modals/modalConfirmation'
 
 type PropsTypes = {
     todosData: Array<TodoDataTypes>
 }
 const TodoList = ({todosData}: PropsTypes) => {
-    const { data } = useSession()
-    const user = data?.user as UserLoginTypes
+    const user = useCurrentUser()
+    const { handleDataEdit } = useModalEditStore()
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isModalDelete, setIsModalDelete] = useState<null | string>(null)
     const [isModalAddTask, setIsModalAddTask] = useState<null | string>(null)
     const [isModalEditTodo, setIsModalEditTodo] = useState<boolean>(false)
-    const { handleDataEdit } = useModalEditStore()
 
     const handleDeleteTodo = async () => {
         setIsLoading(true)
@@ -46,7 +45,6 @@ const TodoList = ({todosData}: PropsTypes) => {
             todoTopics: todo.topics,
         })
     }
-
     return (
         <Fragment>
             {/* Showing add task modal */}
@@ -76,10 +74,7 @@ const TodoList = ({todosData}: PropsTypes) => {
                     transition={{duration: 0.3, delay: 0.3}}
                     className={`${todosData.length > 0 ? 'columns-1 sm:columns-2 lg:columns-3 gap-x-5' : ''}`}>
                         {todosData.length > 0 ? todosData.map((todo) => (
-                            <Todo 
-                                key={todo._id} 
-                                todo={todo}
-                                handleOpenModalAddTask={() => setIsModalAddTask(todo._id)}
+                            <TodoItem key={todo._id} todo={todo} handleOpenModalAddTask={() => setIsModalAddTask(todo._id)}
                                 handleOpenModalDelete={() => setIsModalDelete(todo._id)}
                                 handleOpenModalEdit={() => handleOpenModalEditTodo(todo)}/>
                         )) : (
@@ -93,5 +88,4 @@ const TodoList = ({todosData}: PropsTypes) => {
         </Fragment>
     )
 }
-
 export default TodoList

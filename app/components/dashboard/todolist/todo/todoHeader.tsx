@@ -1,12 +1,11 @@
 'use client'
 import React, { Fragment, useState } from 'react'
-import Link from 'next/link'
 import { MdFilterList } from 'react-icons/md'
 import { GoChevronDown } from "react-icons/go"
 import Button from '@/app/components/ui/button'
-import { IoIosReturnLeft } from 'react-icons/io'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useModalEditStore } from '@/app/store/zustand'
+import BackButton from '@/app/components/utils/backButton'
 import BreadCrumb from '@/app/components/utils/breadCrumb'
 import ModalTaskForm from '@/app/components/modals/modalTaskForm'
 import ModalTodoForm from '@/app/components/modals/modalTodoForm'
@@ -60,12 +59,7 @@ const TodoHeader = ({todo}: PropsTypes) => {
                             <Button type='button' classes='!mr-5' handleClick={() => setIsModalAddTask(todo._id)}>
                                 Add new task
                             </Button>
-                            <Button type='button' variant='outline'>
-                                <IoIosReturnLeft className='text-lg mr-2 text-gray-700 dark:text-gray-300'/>
-                                <Link href="/dashboard/todo-list">
-                                    Back to previous
-                                </Link>
-                            </Button>
+                            <BackButton linkHref='todo-list'/>
                         </div>
                 </motion.div>
             </AnimatePresence>

@@ -6,7 +6,6 @@ import ColleagueFormHeader from '@/app/components/dashboard/colleague/colleagueF
 export const metadata = {
 	title: 'Add new colleague | SELFManaged'
 }
-
 const AddNewColleague = () => {
 	return (
 		<section className='flex-1'>
@@ -18,5 +17,4 @@ const AddNewColleague = () => {
 		</section>
 	)
 }
-
 export default AddNewColleague

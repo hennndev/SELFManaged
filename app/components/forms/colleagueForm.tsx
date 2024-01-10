@@ -2,13 +2,13 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import toast from 'react-hot-toast'
 import 'react-international-phone/style.css'
-import { useSession } from 'next-auth/react'
 import Button from '@/app/components/ui/button'
 import { jobOptions } from '@/app/utils/jobOptions'
 import { useForm, Controller } from 'react-hook-form'
 import { PhoneInput } from 'react-international-phone'
 import { useParams, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
+import useCurrentUser from '@/app/hooks/useCurrentUser'
 import { CountryDropdown } from 'react-country-region-selector'
 import { addNewColleague, getColleague, editColleague } from '@/app/lib/actions/colleague.actions'
 
@@ -21,8 +21,7 @@ type FormTypes = ColleagueTypes & { jobOthers: string}
 const ColleagueForm = ({title, isEdit}: PropsTypes) => {
     const params = useParams()
     const router = useRouter()
-    const { data } = useSession()
-    const user = data?.user as UserLoginTypes
+    const user = useCurrentUser()
     const [isFocus, setIsFocus] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const {register, formState: {errors}, setValue, clearErrors, reset,  handleSubmit, control, watch} = useForm<FormTypes>({defaultValues: {
@@ -52,7 +51,6 @@ const ColleagueForm = ({title, isEdit}: PropsTypes) => {
             job: formValues.job === 'Others' ? jobOthers : formValues.job
         })
     }
-
     const onSubmit = async (values: FormTypes) => {
         setIsLoading(true)
         try {

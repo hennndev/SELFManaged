@@ -6,7 +6,7 @@ import TasksTable from '@/app/components/tables/tasksTable'
 type PropsTypes = {
     todoData: TodoDataTypes
 }
-const TodoPageContent = ({todoData}: PropsTypes) => {
+const Todo = ({todoData}: PropsTypes) => {
     return (
         <AnimatePresence>
             <motion.div
@@ -31,5 +31,4 @@ const TodoPageContent = ({todoData}: PropsTypes) => {
         </AnimatePresence>
     )
 }
-
-export default TodoPageContent
+export default Todo

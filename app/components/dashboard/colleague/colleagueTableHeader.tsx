@@ -46,5 +46,4 @@ const ColleagueTableHeader = () => {
         </AnimatePresence>
     )
 }
-
 export default ColleagueTableHeader

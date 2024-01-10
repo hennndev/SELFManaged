@@ -80,23 +80,21 @@ type TaskDataTypes = {
 
 
 
-
+// EXPENSE MANAGER
 type ExpenseManagerTypes = {
     expenseManagerTitle: string
     expenseManagerCurrency: 'USD' | 'IDR'
     expenseManagerDescription: string
 }
-
 type ExpenseManagerDataTypes = {
     _id: string
     title: string 
     currency: 'USD' | 'IDR'
     balance: number
     description: string
-    transactions: Array<TransactionTypes>
+    transactions: Array<TransactionDataTypes>
+    createdAt: Date
 }
-
-// Transaction
 type TransactionTypes = {
     transactionName: string
     transactionType: 'income' | 'expense'
@@ -106,7 +104,6 @@ type TransactionTypes = {
     transactionDate: string
     transactionTime: string
 }
-
 type TransactionDataTypes = {
     _id: string
     name: string
@@ -115,4 +112,5 @@ type TransactionDataTypes = {
     description: string
     amount: number
     date: string
+    time: string
 }

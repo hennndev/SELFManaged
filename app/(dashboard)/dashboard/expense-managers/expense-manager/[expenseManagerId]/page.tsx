@@ -8,25 +8,19 @@ import ExpenseManagerHeader from '@/app/components/dashboard/expense-managers/ex
 export const metadata = {
     title: 'Expense Manager | SELFManaged'
 }
-
 const ExpenseManager = async ({params}: {params: {expenseManagerId: string}}) => {
-
-    const data: {
-        expenseManager?: ExpenseManagerDataTypes | undefined,
-        error?: string | undefined
-    }= await getExpenseManager(params.expenseManagerId)
-    if(data.error) {
+    const response = await getExpenseManager(params.expenseManagerId)
+    if(response.error) {
         redirect('/dashboard/expense-managers')
     }
     return (
         <section className='flex-1'>
             <Navbar title='Expense Manager'/>
             <section className='px-7 mt-5 pb-10'>
-                <ExpenseManagerHeader expenseManager={data.expenseManager as ExpenseManagerDataTypes}/>
-                <ExpenseManagerContent data={data.expenseManager as ExpenseManagerDataTypes}/>
+                <ExpenseManagerHeader data={response.data as ExpenseManagerDataTypes}/>
+                <ExpenseManagerContent data={response.data as ExpenseManagerDataTypes}/>
             </section>
         </section>
     )
 }
-
 export default ExpenseManager
