@@ -99,7 +99,7 @@ const TransactionTable = ({expenseManagerId, data}: PropsTypes) => {
                 </thead>
                 <tbody>
                     {data.length > 0 ? data.map((transaction, index) => (
-                        <tr className={`text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222]`}>
+                        <tr key={transaction._id} className={`text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222]`}>
                             <td className='px-3 py-3 text-[14px]'>{index + 1}</td>
                             <td className='px-3 py-3 text-[14px]'>{transaction.name}</td>
                             <td className={`px-3 py-3 text-[14px] ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'} font-medium`}>
