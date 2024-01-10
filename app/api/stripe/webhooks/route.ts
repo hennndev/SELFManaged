@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { changeUserSubscribed, testActionWebhook } from '@/app/lib/actions/userActions'
+import { changeUserSubscribed } from '@/app/lib/actions/userActions'
 import { NextResponse } from 'next/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET as string)
